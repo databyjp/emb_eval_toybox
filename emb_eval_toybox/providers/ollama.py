@@ -3,10 +3,15 @@ from typing import List, Union
 import numpy as np
 from .base import EmbeddingProvider
 
+
 class OllamaProvider(EmbeddingProvider):
     """Provider for Ollama embeddings."""
 
-    def __init__(self, model_name: str = "nomic-embed-text", base_url: str = "http://localhost:11434"):
+    def __init__(
+        self,
+        model_name: str = "nomic-embed-text",
+        base_url: str = "http://localhost:11434",
+    ):
         """Initialize the provider with a specific model.
 
         Args:
@@ -34,10 +39,7 @@ class OllamaProvider(EmbeddingProvider):
         for text in texts:
             response = requests.post(
                 f"{self._base_url}/api/embeddings",
-                json={
-                    "model": self._model_name,
-                    "prompt": text
-                }
+                json={"model": self._model_name, "prompt": text},
             )
             response.raise_for_status()
             embeddings.append(response.json()["embedding"])
