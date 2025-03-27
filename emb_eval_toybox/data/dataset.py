@@ -41,6 +41,6 @@ class SearchDataset:
         """Return the number of queries in the dataset."""
         return len(self.queries)
 
-    def __getitem__(self, idx: int) -> tuple[str, np.ndarray]:
-        """Get a query and its relevance scores by index."""
-        return self.queries[idx], self.relevance[idx]
+    def __getitem__(self, idx: int) -> tuple[str, List[int]]:
+        """Get a query and indices of its relevant documents by index."""
+        return self.queries[idx], self.get_relevant_documents(idx)

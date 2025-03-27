@@ -8,6 +8,9 @@ version = "0.1.0"
 description = "Educational resource for evaluating embedding models"
 requires-python = ">=3.8"
 
+[tool.setuptools]
+packages = ["emb_eval_toybox"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
