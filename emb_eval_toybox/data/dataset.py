@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import List, Dict, Union
 import numpy as np
 
+
 class SearchDataset:
     def __init__(self, data_path: Union[str, Path]):
         """Initialize the dataset with the path to the JSON file.
@@ -25,12 +26,12 @@ class SearchDataset:
 
     def _load_data(self) -> None:
         """Load the dataset from JSON file."""
-        with open(self.data_path, 'r') as f:
+        with open(self.data_path, "r") as f:
             data = json.load(f)
 
-        self.queries = data['queries']
-        self.documents = data['documents']
-        self.relevance = np.array(data['relevance'])
+        self.queries = data["queries"]
+        self.documents = data["documents"]
+        self.relevance = np.array(data["relevance"])
 
     def get_relevant_documents(self, query_idx: int) -> List[int]:
         """Get indices of relevant documents for a given query."""

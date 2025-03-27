@@ -33,7 +33,7 @@ This project provides a practical framework for evaluating embedding models in s
 ## Project Structure
 
 ```
-emb_eval/
+emb_eval_toybox/
 ├── data/             # Sample datasets and processed data
 ├── src/              # Source code
 │   ├── data/         # Data processing modules
