@@ -1,70 +1,59 @@
-# Embedding Model Evaluation Project
+# Embedding Evaluation Toybox
 
-This project serves as an educational resource for the Weaviate Academy course on embedding models and selection. It demonstrates how to evaluate embedding models specifically for vector search applications.
+A Python tool for evaluating vector embedding models, designed for educational purposes. This tool provides simple examples for comparing different embedding models on semantic search tasks.
 
-## Project Overview
+## Features
 
-This project provides a practical framework for evaluating embedding models in semantic search scenarios:
-- Loading and preprocessing search queries and documents
-- Generating embeddings using different models
-- Evaluating search performance using standard metrics
-- Making informed decisions about model selection
+- Support for multiple embedding providers:
+  - Sentence Transformers
+  - Ollama
+- Evaluation metrics:
+  - NDCG (Normalized Discounted Cumulative Gain) with graded relevance
+  - Support for multiple evaluation depths (NDCG@3, NDCG@5, NDCG@10)
+  - Precision@k, Recall@k
+- Synthetic datasets for testing:
 
-## Key Components
+## Installation
 
-### 1. Data Processing
-- Query and document preprocessing
-- Dataset loading and management
-- Support for standard search evaluation datasets
+```bash
+pip install -e .
+```
 
-### 2. Embedding Generation
-- Integration with popular embedding models
-- Batch processing capabilities
-- Model configuration management
+## Usage
 
-### 3. Search Evaluation Metrics
-- Precision@k (k=1,5,10)
-- Recall@k
-- Mean Reciprocal Rank (MRR)
-- Normalized Discounted Cumulative Gain (NDCG)
-- Query-document similarity scores
-- Performance metrics (inference speed, memory usage)
+### Basic Evaluation
 
-## Project Structure
+Run the basic evaluation script to compare different embedding models:
+
+```bash
+python examples/basic_evaluation.py
+```
+
+### NDCG Evaluation
+
+Run the NDCG evaluation script to get detailed ranking quality metrics:
+
+```bash
+python examples/ndcg_evaluation.py
+```
+
+## Datasets
+
+The tool includes synthetic datasets designed to test semantic understanding:
+
+### Project Structure
 
 ```
 emb_eval_toybox/
-├── data/             # Sample datasets and processed data
-├── src/              # Source code
-│   ├── data/         # Data processing modules
-│   ├── embeddings/   # Embedding model implementations
-│   └── evaluation/   # Search evaluation metrics
-├── notebooks/        # Jupyter notebooks for tutorials
-├── tests/            # Test cases
-└── requirements.txt  # Project dependencies
+├── data/                    # Dataset files
+├── emb_eval_toybox/        # Main package
+│   ├── data/              # Dataset loading
+│   └── providers/         # Embedding providers
+└── examples/              # Example scripts
 ```
 
-## Getting Started
+## Dependencies
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Run the example notebooks in the `notebooks/` directory
-
-## Requirements
-
-- Python 3.8+
-- NumPy
-- Pandas
-- Scikit-learn
-- Sentence Transformers (for embedding models)
-
-## Contributing
-
-This project is part of the Weaviate Academy curriculum. Contributions are welcome through pull requests.
-
-## License
-
-MIT License
+- sentence-transformers>=2.2.0
+- numpy>=1.24.0
+- pytest>=7.0.0 (dev)
