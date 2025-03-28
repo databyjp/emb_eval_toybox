@@ -13,11 +13,5 @@
         [1, 1, 0],
         [0, 0, 1],
         [1, 0, 0]
-    ],
-    "metadata": {
-        "description": "A synthetic dataset for evaluating semantic search with coffee-related queries and documents",
-        "num_queries": 4,
-        "num_documents": 4,
-        "categories": ["beverages", "coffee", "cafe drinks"]
-    }
+    ]
 }
