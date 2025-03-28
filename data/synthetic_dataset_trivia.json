@@ -1,0 +1,24 @@
+{
+    "queries": [
+        "What are some surprising facts about human biology?",
+        "Facts about early computing history, or pioneers of the field.",
+        "Historical events that involved unexpected consequences."
+    ],
+    "documents": [
+        "The human eye can distinguish about 10 million different colors, but our brain can only name a few hundred of them. This gap between perception and language reveals the complexity of human visual experience.",
+        "The Great Fire of London in 1666 destroyed most of medieval London, but it also helped eradicate the bubonic plague by killing the rats that carried the disease. This unintended consequence led to improved urban planning.",
+        "Honey never spoils - archaeologists have found pots of honey in ancient Egyptian tombs that are over 3,000 years old and still perfectly edible. This is due to its low moisture content and high acidity.",
+        "The first computer programmer was Ada Lovelace, who wrote algorithms for Charles Babbage's Analytical Engine in the 1840s. She predicted that computers could be used for more than just calculations.",
+        "Octopuses have nine brains - one central brain and eight additional brains in each tentacle. This distributed intelligence allows their arms to function semi-independently.",
+        "The invention of the printing press in 1440 led to a dramatic increase in literacy rates, but it also caused a temporary decline in the quality of books as printers rushed to meet demand.",
+        "The human brain processes visual information so quickly that we can identify images in as little as 13 milliseconds. This speed is crucial for survival and decision-making.",
+        "The discovery of penicillin was an accident - Alexander Fleming left a petri dish uncovered while on vacation, allowing mold to grow and kill the bacteria he was studying.",
+        "Some trees can communicate with each other through underground fungal networks, sharing nutrients and warning each other of threats. This 'wood wide web' challenges our understanding of plant intelligence.",
+        "The first email was sent in 1971 by Ray Tomlinson, who also chose the @ symbol for email addresses. This simple decision has become a universal symbol of digital communication."
+    ],
+    "relevance": [
+        [1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+        [0, 1, 0, 0, 0, 1, 0, 1, 0, 0]
+    ]
+}

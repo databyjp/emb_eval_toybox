@@ -97,7 +97,8 @@ def evaluate_provider(dataset_path: str, provider_name: str, provider_type: str)
 
 if __name__ == "__main__":
     # Define the dataset and providers to evaluate
-    dataset_path = "data/synthetic_dataset_instruments.json"
+    # dataset_path = "data/synthetic_dataset_coffee.json"  # Very simple dataset
+    dataset_path = "data/synthetic_dataset_trivia.json"
 
     # List of providers to evaluate
     providers = [

@@ -1,21 +1,18 @@
 {
     "queries": [
         "What's a strong espresso drink with milk?",
-        "I want something sweet with coffee",
-        "Show me drinks with whipped cream",
+        "Show me drinks with coffee and hot water",
         "What's the most popular coffee drink?"
     ],
     "documents": [
         "A cappuccino is made with equal parts espresso, steamed milk, and milk foam. It's one of the most popular coffee drinks worldwide.",
         "A latte is an espresso-based drink with steamed milk and a small layer of foam. It's known for its smooth, creamy texture.",
-        "A mocha combines espresso with steamed milk and chocolate, topped with whipped cream. It's perfect for those who love sweet coffee drinks.",
         "An Americano is made by diluting espresso with hot water. It's strong but less intense than straight espresso."
     ],
     "relevance": [
-        [1, 1, 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 1, 0],
-        [1, 0, 0, 0]
+        [1, 1, 0],
+        [0, 0, 1],
+        [1, 0, 0]
     ],
     "metadata": {
         "description": "A synthetic dataset for evaluating semantic search with coffee-related queries and documents",
