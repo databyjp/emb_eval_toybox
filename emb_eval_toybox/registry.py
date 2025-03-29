@@ -2,6 +2,7 @@
 
 from typing import List, Dict, Tuple
 
+
 def get_available_providers() -> List[Tuple[str, str]]:
     """Get list of available embedding providers.
 
@@ -13,6 +14,7 @@ def get_available_providers() -> List[Tuple[str, str]]:
         ("snowflake-arctic-embed:22m", "ollama"),
         ("snowflake-arctic-embed2", "ollama"),
     ]
+
 
 def get_available_datasets() -> Dict[str, str]:
     """Get available evaluation datasets.

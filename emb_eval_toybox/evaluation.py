@@ -6,6 +6,7 @@ from typing import List, Dict, Any
 from .data.dataset import SearchDataset
 from .providers import SentenceTransformersProvider, OllamaProvider
 
+
 def calculate_dcg(relevance_scores: list[int], k: int = None) -> float:
     """Calculate Discounted Cumulative Gain.
 
@@ -26,7 +27,10 @@ def calculate_dcg(relevance_scores: list[int], k: int = None) -> float:
 
     return dcg
 
-def calculate_ndcg(actual_scores: list[int], ideal_scores: list[int], k: int = None) -> float:
+
+def calculate_ndcg(
+    actual_scores: list[int], ideal_scores: list[int], k: int = None
+) -> float:
     """Calculate Normalized Discounted Cumulative Gain.
 
     Args:
@@ -41,7 +45,10 @@ def calculate_ndcg(actual_scores: list[int], ideal_scores: list[int], k: int = N
     idcg = calculate_dcg(ideal_scores, k)
     return dcg / idcg if idcg > 0 else 0.0
 
-def calculate_precision_recall(predicted_indices: List[int], true_relevant: List[int], k: int = None) -> tuple[float, float]:
+
+def calculate_precision_recall(
+    predicted_indices: List[int], true_relevant: List[int], k: int = None
+) -> tuple[float, float]:
     """Calculate precision and recall at k.
 
     Args:
@@ -55,14 +62,21 @@ def calculate_precision_recall(predicted_indices: List[int], true_relevant: List
     if k is not None:
         predicted_indices = predicted_indices[:k]
 
-    true_relevant = set(true_relevant)
-    predicted_relevant = set(predicted_indices)
+    # Convert to sets for intersection
+    true_relevant_set = set(true_relevant)
+    predicted_set = set(predicted_indices)
 
-    true_positives = len(true_relevant.intersection(predicted_relevant))
-    precision = true_positives / len(predicted_indices) if predicted_indices else 0
-    recall = true_positives / len(true_relevant) if true_relevant else 1
+    # Calculate true positives (correctly predicted relevant documents)
+    true_positives = len(true_relevant_set.intersection(predicted_set))
+
+    # Precision = true positives / total predicted (at k)
+    precision = true_positives / len(predicted_indices) if predicted_indices else 0.0
+
+    # Recall = true positives / total relevant
+    recall = true_positives / len(true_relevant_set) if true_relevant_set else 1.0
 
     return precision, recall
+
 
 def evaluate_embeddings(
     dataset_path: str,
@@ -115,11 +129,15 @@ def evaluate_embeddings(
 
         # Calculate precision/recall at different k values
         precision_recall_scores = {}
+        true_relevant_indices = [
+            i
+            for i, score in enumerate(dataset.relevance[query_idx])
+            if score > 0  # Consider any positive relevance score as relevant
+        ]
+
         for k in k_values:
             precision, recall = calculate_precision_recall(
-                top_k_indices.tolist(),
-                dataset.get_relevant_documents(query_idx),
-                k
+                top_k_indices.tolist(), true_relevant_indices, k
             )
             precision_recall_scores[k] = {"precision": precision, "recall": recall}
 
@@ -131,16 +149,18 @@ def evaluate_embeddings(
         ]
         all_docs_with_scores.sort(key=lambda x: x[1], reverse=True)
 
-        results.append({
-            "query": query,
-            "true_relevant": all_docs_with_scores,
-            "predicted_relevant": [
-                (dataset.documents[i], dataset.relevance[query_idx][i])
-                for i in top_k_indices
-            ],
-            "ndcg": ndcg_scores,
-            "precision_recall": precision_recall_scores,
-            "k_values": k_values,
-        })
+        results.append(
+            {
+                "query": query,
+                "true_relevant": all_docs_with_scores,
+                "predicted_relevant": [
+                    (dataset.documents[i], dataset.relevance[query_idx][i])
+                    for i in top_k_indices
+                ],
+                "ndcg": ndcg_scores,
+                "precision_recall": precision_recall_scores,
+                "k_values": k_values,
+            }
+        )
 
     return results

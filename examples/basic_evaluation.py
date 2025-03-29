@@ -3,6 +3,7 @@
 from emb_eval_toybox.evaluation import evaluate_embeddings
 from emb_eval_toybox.registry import get_available_providers, get_available_datasets
 
+
 def print_results(results):
     """Print basic evaluation results."""
     print("\nEvaluation Results:")
@@ -27,23 +28,27 @@ def print_results(results):
 
         print("-" * 50)
 
+
 def main():
     """Run basic evaluation on all available providers."""
     dataset_path = get_available_datasets()["Trivia (Simple)"]
 
     for model_name, provider_type in get_available_providers():
         try:
-            print(f"\nEvaluating with {provider_type} ({model_name}) on dataset: {dataset_path}")
+            print(
+                f"\nEvaluating with {provider_type} ({model_name}) on dataset: {dataset_path}"
+            )
             results = evaluate_embeddings(
                 dataset_path,
                 model_name,
                 provider_type,
-                k_values=[3]  # Only show basic metrics at k=3
+                k_values=[3],  # Only show basic metrics at k=3
             )
             print_results(results)
         except Exception as e:
             print(f"Error evaluating {provider_type} ({model_name}): {str(e)}")
             continue
+
 
 if __name__ == "__main__":
     main()
