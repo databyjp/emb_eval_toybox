@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 from typing import List, Dict, Any
 from .data.dataset import SearchDataset
-from .providers import SentenceTransformersProvider, OllamaProvider
+from .providers import SentenceTransformersProvider, OllamaProvider, CohereProvider
 
 
 def calculate_dcg(relevance_scores: list[int], k: int = None) -> float:
@@ -107,6 +107,8 @@ def evaluate_basic(
         provider = SentenceTransformersProvider(provider_name)
     elif provider_type == "ollama":
         provider = OllamaProvider(provider_name)
+    elif provider_type == "cohere":
+        provider = CohereProvider(provider_name)
     else:
         raise ValueError(f"Unknown provider type: {provider_type}")
 
@@ -186,6 +188,8 @@ def evaluate_ndcg(
         provider = SentenceTransformersProvider(provider_name)
     elif provider_type == "ollama":
         provider = OllamaProvider(provider_name)
+    elif provider_type == "cohere":
+        provider = CohereProvider(provider_name)
     else:
         raise ValueError(f"Unknown provider type: {provider_type}")
 
@@ -233,11 +237,18 @@ def evaluate_embeddings(
     provider_type: str = "sentence_transformers",
     k_values: List[int] = None,
 ) -> List[Dict[str, Any]]:
-    """High-level function that delegates to the appropriate evaluation function.
-
-    This maintains backwards compatibility and provides a single entry point.
-    """
+    """High-level function that delegates to the appropriate evaluation function."""
     dataset = SearchDataset(dataset_path)
+
+    # Initialize the embedding provider
+    if provider_type == "sentence_transformers":
+        provider = SentenceTransformersProvider(provider_name)
+    elif provider_type == "ollama":
+        provider = OllamaProvider(provider_name)
+    elif provider_type == "cohere":
+        provider = CohereProvider(provider_name)
+    else:
+        raise ValueError(f"Unknown provider type: {provider_type}")
 
     if dataset.evaluation_type == "basic":
         return evaluate_basic(dataset_path, provider_name, provider_type, k_values)
