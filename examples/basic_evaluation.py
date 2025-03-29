@@ -2,7 +2,9 @@
 
 from emb_eval_toybox.evaluation import evaluate_embeddings
 from emb_eval_toybox.registry import get_available_providers, get_available_datasets
+from emb_eval_toybox.data.dataset import SearchDataset
 from collections import defaultdict
+from typing import List, Dict, Any
 
 
 def print_results(results):
@@ -113,14 +115,22 @@ def main():
     for dataset_name, dataset_path in dataset_paths.items():
         print(f"Evaluating on dataset: {dataset_name}")
 
+        # Load dataset to check relevant document counts
+        dataset = SearchDataset(dataset_path)
+        max_relevant = max(
+            sum(1 for score in query_scores if score > 0)
+            for query_scores in dataset.relevance
+        )
+        print(f"Maximum relevant documents in dataset: {max_relevant}")
+
         for model_name, provider_type in get_available_providers():
             try:
-                print(f"\nEvaluating with {provider_type} ({model_name}) on dataset: {dataset_path}")
+                print(f"\nEvaluating with {provider_type} ({model_name})")
+                # Let evaluate_embeddings choose appropriate k values
                 results = evaluate_embeddings(
                     dataset_path,
                     model_name,
                     provider_type,
-                    k_values=[3, 5, 10],  # Multiple k values
                 )
                 print_results(results)
 

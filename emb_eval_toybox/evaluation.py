@@ -218,7 +218,22 @@ def evaluate_embeddings(
     """High-level function that delegates to the appropriate evaluation function."""
     dataset = SearchDataset(dataset_path)
 
-    # Initialize the embedding provider using the factory function
+    # Calculate maximum number of relevant documents
+    max_relevant = max(
+        sum(1 for score in query_scores if score > 0)
+        for query_scores in dataset.relevance
+    )
+
+    # If k_values not provided, choose appropriate ones based on evaluation type
+    if k_values is None:
+        suggested_k = [3, 5, 10]
+        if dataset.evaluation_type == "basic":
+            # For precision/recall, limit k to reasonable values
+            k_values = [min(k, max_relevant) for k in suggested_k if k <= max_relevant * 2]
+        else:  # ndcg
+            # For NDCG, we can go a bit higher but still keep it reasonable
+            k_values = [k for k in suggested_k if k <= max(max_relevant * 3, 10)]
+
     provider = create_provider(provider_type, provider_name)
 
     if dataset.evaluation_type == "basic":

@@ -17,7 +17,18 @@ def main():
             f"It is marked for {dataset.evaluation_type} evaluation."
         )
 
+    # Calculate maximum number of relevant documents
+    max_relevant = max(
+        sum(1 for score in query_scores if score > 0)
+        for query_scores in dataset.relevance
+    )
+
+    # Choose appropriate k values for NDCG
+    suggested_k = [3, 5, 10]
+    k_values = [k for k in suggested_k if k <= max(max_relevant * 3, 10)]
+
     print(f"Using dataset: {dataset.description}")
+    print(f"Evaluating at k values: {k_values} (based on {max_relevant} maximum relevant documents)")
 
     # Dictionary to store results for all models
     all_results = defaultdict(dict)
@@ -31,20 +42,20 @@ def main():
                 dataset_path,
                 model_name,
                 provider_type,
-                k_values=[3, 5, 10],  # Multiple k values for better analysis
+                k_values=k_values,
             )
             print_results(results)
 
-            # Calculate average NDCG@k across all queries
-            metrics = defaultdict(list)
+            # Collect metrics and average across queries
+            metrics_accumulator = defaultdict(list)
             for result in results:
                 for k, score in result["ndcg"].items():
-                    metrics[f"NDCG@{k}"].append(score)
+                    metrics_accumulator[f"NDCG@{k}"].append(score)
 
-            # Average the scores
+            # Calculate averages
             averaged_metrics = {
-                k: sum(scores) / len(scores)
-                for k, scores in metrics.items()
+                metric: sum(scores) / len(scores)
+                for metric, scores in metrics_accumulator.items()
             }
 
             all_results[(model_name, provider_type)]["Trivia (Graded)"] = averaged_metrics
