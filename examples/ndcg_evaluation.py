@@ -31,17 +31,23 @@ def main():
                 dataset_path,
                 model_name,
                 provider_type,
-                k_values=[3],  # Show metrics at multiple k values
+                k_values=[3, 5, 10],  # Multiple k values for better analysis
             )
             print_results(results)
 
-            # Collect metrics for summary
-            metrics = {}
+            # Calculate average NDCG@k across all queries
+            metrics = defaultdict(list)
             for result in results:
                 for k, score in result["ndcg"].items():
-                    metrics[f"NDCG@{k}"] = score
+                    metrics[f"NDCG@{k}"].append(score)
 
-            all_results[(model_name, provider_type)]["Trivia (Graded)"] = metrics
+            # Average the scores
+            averaged_metrics = {
+                k: sum(scores) / len(scores)
+                for k, scores in metrics.items()
+            }
+
+            all_results[(model_name, provider_type)]["Trivia (Graded)"] = averaged_metrics
 
         except Exception as e:
             print(f"Error evaluating {provider_type} ({model_name}): {str(e)}")
