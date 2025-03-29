@@ -5,6 +5,12 @@ import numpy as np
 
 
 class SearchDataset:
+    """Dataset for evaluating search/retrieval performance.
+
+    Supports two types of evaluation:
+    - "basic": Binary relevance (0/1) for precision/recall metrics
+    - "ndcg": Graded relevance (0-N) for normalized discounted cumulative gain
+    """
     def __init__(self, data_path: Union[str, Path]):
         """Initialize the dataset with the path to the JSON file.
 
@@ -13,7 +19,8 @@ class SearchDataset:
                       Expected format:
                       {
                           "metadata": {
-                              "evaluation_type": str,
+                              "name": str,
+                              "evaluation_type": str,  # "basic" (precision/recall) or "ndcg"
                               "description": str
                           },
                           "queries": List[str],

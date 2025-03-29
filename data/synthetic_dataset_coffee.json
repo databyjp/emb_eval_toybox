@@ -1,8 +1,8 @@
 {
     "metadata": {
-        "name": "Coffee",
+        "name": "Coffee Dataset",
         "evaluation_type": "basic",
-        "description": "A binary relevance dataset about coffee drinks for basic precision/recall evaluation"
+        "description": "A binary relevance dataset about coffee drinks for precision/recall evaluation. Uses 0/1 relevance scores to indicate whether a document is relevant to each query."
     },
     "queries": [
         "What's a strong espresso drink with milk?",

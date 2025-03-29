@@ -2,7 +2,7 @@
     "metadata": {
         "name": "Trivia (Simple)",
         "evaluation_type": "basic",
-        "description": "A binary relevance dataset for basic precision/recall evaluation"
+        "description": "A binary relevance dataset for precision/recall evaluation. Uses 0/1 relevance scores to test basic retrieval performance on trivia questions."
     },
     "queries": [
         "What are some surprising facts about human biology?",
