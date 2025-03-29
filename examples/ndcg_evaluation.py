@@ -2,6 +2,7 @@
 
 from emb_eval_toybox.evaluation import evaluate_embeddings
 from emb_eval_toybox.registry import get_available_providers, get_available_datasets
+from emb_eval_toybox.data.dataset import SearchDataset
 
 
 def print_results(results):
@@ -25,6 +26,15 @@ def print_results(results):
 def main():
     """Run NDCG evaluation on all available providers."""
     dataset_path = get_available_datasets()["Trivia (Graded)"]
+    dataset = SearchDataset(dataset_path)
+
+    if dataset.evaluation_type != "ndcg":
+        raise ValueError(
+            f"Dataset {dataset_path} is not suitable for NDCG evaluation. "
+            f"It is marked for {dataset.evaluation_type} evaluation."
+        )
+
+    print(f"Using dataset: {dataset.description}")
 
     for model_name, provider_type in get_available_providers():
         try:

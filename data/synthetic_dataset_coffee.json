@@ -1,4 +1,8 @@
 {
+    "metadata": {
+        "evaluation_type": "basic",
+        "description": "A binary relevance dataset about coffee drinks for basic precision/recall evaluation"
+    },
     "queries": [
         "What's a strong espresso drink with milk?",
         "Show me drinks with coffee and hot water",

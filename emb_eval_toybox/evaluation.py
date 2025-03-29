@@ -94,14 +94,21 @@ def evaluate_embeddings(
 
     Returns:
         List of dictionaries containing evaluation results for each query
+
+    Raises:
+        ValueError: If the dataset's evaluation_type doesn't match the expected type
     """
     if k_values is None:
         k_values = [3, 5, 10]
 
+    dataset = SearchDataset(dataset_path)
+
+    # Validate that we're using appropriate metrics for the dataset
+    if "ndcg" in dataset.evaluation_type and max(dataset.relevance.flatten()) <= 1:
+        raise ValueError("NDCG evaluation requires graded relevance scores (>1)")
+
     # Number of results to retrieve is the maximum k value
     num_results = max(k_values)
-
-    dataset = SearchDataset(dataset_path)
 
     # Initialize the embedding provider
     if provider_type == "sentence_transformers":

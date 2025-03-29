@@ -1,4 +1,8 @@
 {
+    "metadata": {
+        "evaluation_type": "basic",
+        "description": "A binary relevance dataset for basic precision/recall evaluation"
+    },
     "queries": [
         "What are some surprising facts about human biology?",
         "Facts about early computing history, or pioneers of the field.",

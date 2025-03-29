@@ -1,4 +1,8 @@
 {
+    "metadata": {
+        "evaluation_type": "ndcg",
+        "description": "A graded relevance dataset for NDCG evaluation with relevance scores 0-2"
+    },
     "queries": [
         "What are some surprising facts about human perception?",
         "Which historical events had significant unexpected consequences?"
