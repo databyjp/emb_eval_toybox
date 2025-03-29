@@ -78,13 +78,13 @@ def calculate_precision_recall(
     return precision, recall
 
 
-def evaluate_embeddings(
+def evaluate_basic(
     dataset_path: str,
     provider_name: str = "all-MiniLM-L6-v2",
     provider_type: str = "sentence_transformers",
     k_values: List[int] = None,
 ) -> List[Dict[str, Any]]:
-    """Evaluate an embedding model on a given dataset.
+    """Evaluate an embedding model using basic metrics (precision/recall).
 
     Args:
         dataset_path: Path to the dataset JSON file
@@ -94,21 +94,92 @@ def evaluate_embeddings(
 
     Returns:
         List of dictionaries containing evaluation results for each query
-
-    Raises:
-        ValueError: If the dataset's evaluation_type doesn't match the expected type
     """
-    if k_values is None:
-        k_values = [3, 5, 10]
-
     dataset = SearchDataset(dataset_path)
+    if dataset.evaluation_type != "basic":
+        raise ValueError(f"Dataset {dataset_path} is not suitable for basic evaluation")
 
-    # Validate that we're using appropriate metrics for the dataset
-    if "ndcg" in dataset.evaluation_type and max(dataset.relevance.flatten()) <= 1:
+    # Number of results to retrieve is the maximum k value
+    num_results = max(k_values) if k_values else 10
+
+    # Initialize the embedding provider
+    if provider_type == "sentence_transformers":
+        provider = SentenceTransformersProvider(provider_name)
+    elif provider_type == "ollama":
+        provider = OllamaProvider(provider_name)
+    else:
+        raise ValueError(f"Unknown provider type: {provider_type}")
+
+    # Generate embeddings
+    query_embeddings = provider.encode(dataset.queries)
+    doc_embeddings = provider.encode(dataset.documents)
+    similarities = np.dot(query_embeddings, doc_embeddings.T)
+
+    results = []
+    for query_idx, (query, relevant_docs) in enumerate(dataset):
+        top_k_indices = np.argsort(similarities[query_idx])[-num_results:][::-1]
+
+        # Calculate precision/recall metrics
+        precision_recall_scores = {}
+        true_relevant_indices = [
+            i for i, score in enumerate(dataset.relevance[query_idx])
+            if score > 0
+        ]
+
+        for k in k_values:
+            precision, recall = calculate_precision_recall(
+                top_k_indices.tolist(), true_relevant_indices, k
+            )
+            precision_recall_scores[k] = {"precision": precision, "recall": recall}
+
+        # Get relevant documents with scores (same as original)
+        all_docs_with_scores = [
+            (doc, score)
+            for doc, score in zip(dataset.documents, dataset.relevance[query_idx])
+            if score > 0
+        ]
+        all_docs_with_scores.sort(key=lambda x: x[1], reverse=True)
+
+        results.append({
+            "query": query,
+            "true_relevant": all_docs_with_scores,
+            "predicted_relevant": [
+                (dataset.documents[i], dataset.relevance[query_idx][i])
+                for i in top_k_indices
+            ],
+            "precision_recall": precision_recall_scores,
+            "k_values": k_values,
+        })
+
+    return results
+
+
+def evaluate_ndcg(
+    dataset_path: str,
+    provider_name: str = "all-MiniLM-L6-v2",
+    provider_type: str = "sentence_transformers",
+    k_values: List[int] = None,
+) -> List[Dict[str, Any]]:
+    """Evaluate an embedding model using NDCG metrics.
+
+    Args:
+        dataset_path: Path to the dataset JSON file
+        provider_name: Name of the model to use
+        provider_type: Type of provider ("sentence_transformers" or "ollama")
+        k_values: List of k values for computing metrics. If None, uses [3, 5, 10]
+
+    Returns:
+        List of dictionaries containing evaluation results for each query
+    """
+    dataset = SearchDataset(dataset_path)
+    if dataset.evaluation_type != "ndcg":
+        raise ValueError(f"Dataset {dataset_path} is not suitable for NDCG evaluation")
+
+    if max(dataset.relevance.flatten()) <= 1:
         raise ValueError("NDCG evaluation requires graded relevance scores (>1)")
 
     # Number of results to retrieve is the maximum k value
-    num_results = max(k_values)
+    num_results = max(k_values) if k_values else 10
 
     # Initialize the embedding provider
     if provider_type == "sentence_transformers":
@@ -134,21 +205,7 @@ def evaluate_embeddings(
         for k in k_values:
             ndcg_scores[k] = calculate_ndcg(actual_scores, ideal_scores, k)
 
-        # Calculate precision/recall at different k values
-        precision_recall_scores = {}
-        true_relevant_indices = [
-            i
-            for i, score in enumerate(dataset.relevance[query_idx])
-            if score > 0  # Consider any positive relevance score as relevant
-        ]
-
-        for k in k_values:
-            precision, recall = calculate_precision_recall(
-                top_k_indices.tolist(), true_relevant_indices, k
-            )
-            precision_recall_scores[k] = {"precision": precision, "recall": recall}
-
-        # Get relevant documents with scores
+        # Get relevant documents with scores (same as original)
         all_docs_with_scores = [
             (doc, score)
             for doc, score in zip(dataset.documents, dataset.relevance[query_idx])
@@ -156,18 +213,35 @@ def evaluate_embeddings(
         ]
         all_docs_with_scores.sort(key=lambda x: x[1], reverse=True)
 
-        results.append(
-            {
-                "query": query,
-                "true_relevant": all_docs_with_scores,
-                "predicted_relevant": [
-                    (dataset.documents[i], dataset.relevance[query_idx][i])
-                    for i in top_k_indices
-                ],
-                "ndcg": ndcg_scores,
-                "precision_recall": precision_recall_scores,
-                "k_values": k_values,
-            }
-        )
+        results.append({
+            "query": query,
+            "true_relevant": all_docs_with_scores,
+            "predicted_relevant": [
+                (dataset.documents[i], dataset.relevance[query_idx][i])
+                for i in top_k_indices
+            ],
+            "ndcg": ndcg_scores,
+            "k_values": k_values,
+        })
 
     return results
+
+
+def evaluate_embeddings(
+    dataset_path: str,
+    provider_name: str = "all-MiniLM-L6-v2",
+    provider_type: str = "sentence_transformers",
+    k_values: List[int] = None,
+) -> List[Dict[str, Any]]:
+    """High-level function that delegates to the appropriate evaluation function.
+
+    This maintains backwards compatibility and provides a single entry point.
+    """
+    dataset = SearchDataset(dataset_path)
+
+    if dataset.evaluation_type == "basic":
+        return evaluate_basic(dataset_path, provider_name, provider_type, k_values)
+    elif dataset.evaluation_type == "ndcg":
+        return evaluate_ndcg(dataset_path, provider_name, provider_type, k_values)
+    else:
+        raise ValueError(f"Unknown evaluation type: {dataset.evaluation_type}")

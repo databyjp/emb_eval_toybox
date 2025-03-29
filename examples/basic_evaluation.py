@@ -31,23 +31,24 @@ def print_results(results):
 
 def main():
     """Run basic evaluation on all available providers."""
-    dataset_path = get_available_datasets()["Trivia (Simple)"]
-
-    for model_name, provider_type in get_available_providers():
-        try:
-            print(
-                f"\nEvaluating with {provider_type} ({model_name}) on dataset: {dataset_path}"
-            )
-            results = evaluate_embeddings(
-                dataset_path,
-                model_name,
-                provider_type,
-                k_values=[3],  # Only show basic metrics at k=3
-            )
-            print_results(results)
-        except Exception as e:
-            print(f"Error evaluating {provider_type} ({model_name}): {str(e)}")
-            continue
+    dataset_paths = get_available_datasets()
+    for dataset_name, dataset_path in dataset_paths.items():
+        print(f"Evaluating on dataset: {dataset_name}")
+        for model_name, provider_type in get_available_providers():
+            try:
+                print(
+                    f"\nEvaluating with {provider_type} ({model_name}) on dataset: {dataset_path}"
+                )
+                results = evaluate_embeddings(
+                    dataset_path,
+                    model_name,
+                    provider_type,
+                    k_values=[3],  # Only show basic metrics at k=3
+                )
+                print_results(results)
+            except Exception as e:
+                print(f"Error evaluating {provider_type} ({model_name}): {str(e)}")
+                continue
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 {
     "metadata": {
+        "name": "Trivia (Simple)",
         "evaluation_type": "basic",
         "description": "A binary relevance dataset for basic precision/recall evaluation"
     },

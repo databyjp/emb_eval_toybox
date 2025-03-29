@@ -1,5 +1,6 @@
 {
     "metadata": {
+        "name": "Trivia (Graded)",
         "evaluation_type": "ndcg",
         "description": "A graded relevance dataset for NDCG evaluation with relevance scores 0-2"
     },

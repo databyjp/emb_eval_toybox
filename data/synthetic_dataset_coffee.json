@@ -1,5 +1,6 @@
 {
     "metadata": {
+        "name": "Coffee",
         "evaluation_type": "basic",
         "description": "A binary relevance dataset about coffee drinks for basic precision/recall evaluation"
     },

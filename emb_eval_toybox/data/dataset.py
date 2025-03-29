@@ -52,6 +52,11 @@ class SearchDataset:
         """Get the dataset description."""
         return self.metadata["description"]
 
+    @property
+    def name(self) -> str:
+        """Get the dataset name."""
+        return self.metadata["name"]
+
     def get_relevant_documents(self, query_idx: int) -> List[int]:
         """Get indices of relevant documents for a given query."""
         return [i for i, rel in enumerate(self.relevance[query_idx]) if rel == 1]

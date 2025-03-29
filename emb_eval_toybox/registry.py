@@ -1,6 +1,8 @@
 """Registry of available models and datasets."""
 
 from typing import List, Dict, Tuple
+import json
+from pathlib import Path
 
 
 def get_available_providers() -> List[Tuple[str, str]]:
@@ -22,8 +24,13 @@ def get_available_datasets() -> Dict[str, str]:
     Returns:
         Dictionary mapping dataset names to file paths
     """
-    return {
-        "Trivia (Graded)": "data/synthetic_dataset_trivia_graded.json",
-        "Trivia (Simple)": "data/synthetic_dataset_trivia.json",
-        "Coffee": "data/synthetic_dataset_coffee.json",
-    }
+    dataset_dir = Path("data")
+    datasets = {}
+
+    for file_path in dataset_dir.glob("synthetic_dataset_*.json"):
+        with open(file_path) as f:
+            data = json.load(f)
+            name = data["metadata"]["name"]
+            datasets[name] = str(file_path)
+
+    return datasets
