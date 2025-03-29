@@ -8,22 +8,31 @@ import torch
 
 torch.classes.__path__ = []
 
-st.set_page_config(page_title="Embedding Model Evaluation Dashboard", layout="wide")
+st.set_page_config(page_title="Model Evaluation Dashboard", layout="wide")
 
-st.title("Embedding Model Evaluation Dashboard")
+st.title("Model Evaluation Dashboard")
+st.write("Use this page to evaluate and compare different embedding models. To explore the available datasets, use the Dataset Explorer page in the sidebar.")
 
 # Get available models and providers
 available_providers = list(get_available_providers())
-model_options = [
-    (model_name, provider_type) for model_name, provider_type in available_providers
-]
 
-# Model selection
+# Group and sort by provider
+provider_groups = defaultdict(list)
+for model_name, provider_type in available_providers:
+    provider_groups[provider_type].append(model_name)
+
+# Sort providers and models within each provider
+sorted_options = []
+for provider_type in sorted(provider_groups.keys()):
+    for model_name in sorted(provider_groups[provider_type]):
+        sorted_options.append((model_name, provider_type))
+
+# Model selection with formatted display
 selected_models = st.multiselect(
     "Select models to evaluate",
-    options=model_options,
-    default=[model_options[0]] if model_options else None,
-    format_func=lambda x: f"{x[0]} ({x[1]})",
+    options=sorted_options,
+    default=[sorted_options[0]] if sorted_options else None,
+    format_func=lambda x: f"{x[1]}: {x[0]}"
 )
 
 if st.button("Run Evaluation"):
