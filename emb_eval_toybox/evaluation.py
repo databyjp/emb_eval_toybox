@@ -4,7 +4,8 @@ from pathlib import Path
 import numpy as np
 from typing import List, Dict, Any
 from .data.dataset import SearchDataset
-from .providers import SentenceTransformersProvider, OllamaProvider, CohereProvider
+from .providers import create_provider
+from .providers.base import EmbeddingProvider
 
 
 def calculate_dcg(relevance_scores: list[int], k: int = None) -> float:
@@ -79,38 +80,22 @@ def calculate_precision_recall(
 
 
 def evaluate_basic(
-    dataset_path: str,
-    provider_name: str = "all-MiniLM-L6-v2",
-    provider_type: str = "sentence_transformers",
+    dataset: SearchDataset,
+    provider: EmbeddingProvider,
     k_values: List[int] = None,
 ) -> List[Dict[str, Any]]:
     """Evaluate an embedding model using basic metrics (precision/recall).
 
     Args:
-        dataset_path: Path to the dataset JSON file
-        provider_name: Name of the model to use
-        provider_type: Type of provider ("sentence_transformers" or "ollama")
+        dataset: SearchDataset object
+        provider: EmbeddingProvider object
         k_values: List of k values for computing metrics. If None, uses [3, 5, 10]
 
     Returns:
         List of dictionaries containing evaluation results for each query
     """
-    dataset = SearchDataset(dataset_path)
-    if dataset.evaluation_type != "basic":
-        raise ValueError(f"Dataset {dataset_path} is not suitable for basic evaluation")
-
-    # Number of results to retrieve is the maximum k value
-    num_results = max(k_values) if k_values else 10
-
-    # Initialize the embedding provider
-    if provider_type == "sentence_transformers":
-        provider = SentenceTransformersProvider(provider_name)
-    elif provider_type == "ollama":
-        provider = OllamaProvider(provider_name)
-    elif provider_type == "cohere":
-        provider = CohereProvider(provider_name)
-    else:
-        raise ValueError(f"Unknown provider type: {provider_type}")
+    if k_values is None:
+        k_values = [3, 5, 10]
 
     # Generate embeddings
     query_embeddings = provider.encode(dataset.queries)
@@ -119,7 +104,7 @@ def evaluate_basic(
 
     results = []
     for query_idx, (query, relevant_docs) in enumerate(dataset):
-        top_k_indices = np.argsort(similarities[query_idx])[-num_results:][::-1]
+        top_k_indices = np.argsort(similarities[query_idx])[-max(k_values):][::-1]
 
         # Calculate precision/recall metrics
         precision_recall_scores = {}
@@ -157,41 +142,22 @@ def evaluate_basic(
 
 
 def evaluate_ndcg(
-    dataset_path: str,
-    provider_name: str = "all-MiniLM-L6-v2",
-    provider_type: str = "sentence_transformers",
+    dataset: SearchDataset,
+    provider: EmbeddingProvider,
     k_values: List[int] = None,
 ) -> List[Dict[str, Any]]:
     """Evaluate an embedding model using NDCG metrics.
 
     Args:
-        dataset_path: Path to the dataset JSON file
-        provider_name: Name of the model to use
-        provider_type: Type of provider ("sentence_transformers" or "ollama")
+        dataset: SearchDataset object
+        provider: EmbeddingProvider object
         k_values: List of k values for computing metrics. If None, uses [3, 5, 10]
 
     Returns:
         List of dictionaries containing evaluation results for each query
     """
-    dataset = SearchDataset(dataset_path)
-    if dataset.evaluation_type != "ndcg":
-        raise ValueError(f"Dataset {dataset_path} is not suitable for NDCG evaluation")
-
-    if max(dataset.relevance.flatten()) <= 1:
-        raise ValueError("NDCG evaluation requires graded relevance scores (>1)")
-
-    # Number of results to retrieve is the maximum k value
-    num_results = max(k_values) if k_values else 10
-
-    # Initialize the embedding provider
-    if provider_type == "sentence_transformers":
-        provider = SentenceTransformersProvider(provider_name)
-    elif provider_type == "ollama":
-        provider = OllamaProvider(provider_name)
-    elif provider_type == "cohere":
-        provider = CohereProvider(provider_name)
-    else:
-        raise ValueError(f"Unknown provider type: {provider_type}")
+    if k_values is None:
+        k_values = [3, 5, 10]
 
     # Generate embeddings
     query_embeddings = provider.encode(dataset.queries)
@@ -200,7 +166,7 @@ def evaluate_ndcg(
 
     results = []
     for query_idx, (query, relevant_docs) in enumerate(dataset):
-        top_k_indices = np.argsort(similarities[query_idx])[-num_results:][::-1]
+        top_k_indices = np.argsort(similarities[query_idx])[-max(k_values):][::-1]
 
         # Calculate NDCG scores
         actual_scores = [dataset.relevance[query_idx][i] for i in top_k_indices]
@@ -240,19 +206,12 @@ def evaluate_embeddings(
     """High-level function that delegates to the appropriate evaluation function."""
     dataset = SearchDataset(dataset_path)
 
-    # Initialize the embedding provider
-    if provider_type == "sentence_transformers":
-        provider = SentenceTransformersProvider(provider_name)
-    elif provider_type == "ollama":
-        provider = OllamaProvider(provider_name)
-    elif provider_type == "cohere":
-        provider = CohereProvider(provider_name)
-    else:
-        raise ValueError(f"Unknown provider type: {provider_type}")
+    # Initialize the embedding provider using the factory function
+    provider = create_provider(provider_type, provider_name)
 
     if dataset.evaluation_type == "basic":
-        return evaluate_basic(dataset_path, provider_name, provider_type, k_values)
+        return evaluate_basic(dataset, provider, k_values)
     elif dataset.evaluation_type == "ndcg":
-        return evaluate_ndcg(dataset_path, provider_name, provider_type, k_values)
+        return evaluate_ndcg(dataset, provider, k_values)
     else:
         raise ValueError(f"Unknown evaluation type: {dataset.evaluation_type}")
