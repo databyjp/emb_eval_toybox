@@ -3,25 +3,8 @@
 from emb_eval_toybox.evaluation import evaluate_embeddings
 from emb_eval_toybox.registry import get_available_providers, get_available_datasets
 from emb_eval_toybox.data.dataset import SearchDataset
-
-
-def print_results(results):
-    """Print evaluation results."""
-    print("\nEvaluation Results:")
-    print("-" * 50)
-    for result in results:
-        print(f"\nQuery: {result['query']}")
-        print(f"\nTrue Relevant ({len(result['true_relevant'])}):")
-        for doc, score in result["true_relevant"]:
-            print(f"  - [Score: {score}] {doc}")
-        print(f"\nPredicted Relevant ({len(result['predicted_relevant'])}):")
-        for doc, score in result["predicted_relevant"]:
-            print(f"  - [Score: {score}] {doc}")
-        print("\n=== Evaluation Metrics ===")
-        for k, score in result["ndcg"].items():
-            print(f"NDCG@{k}: {score:.3f}")
-        print("-" * 50)
-
+from collections import defaultdict
+from basic_evaluation import print_results, print_model_summary
 
 def main():
     """Run NDCG evaluation on all available providers."""
@@ -36,6 +19,9 @@ def main():
 
     print(f"Using dataset: {dataset.description}")
 
+    # Dictionary to store results for all models
+    all_results = defaultdict(dict)
+
     for model_name, provider_type in get_available_providers():
         try:
             print(
@@ -45,13 +31,24 @@ def main():
                 dataset_path,
                 model_name,
                 provider_type,
-                k_values=[1, 3],  # Show metrics at multiple k values
+                k_values=[3],  # Show metrics at multiple k values
             )
             print_results(results)
+
+            # Collect metrics for summary
+            metrics = {}
+            for result in results:
+                for k, score in result["ndcg"].items():
+                    metrics[f"NDCG@{k}"] = score
+
+            all_results[(model_name, provider_type)]["Trivia (Graded)"] = metrics
+
         except Exception as e:
             print(f"Error evaluating {provider_type} ({model_name}): {str(e)}")
             continue
 
+    # Print final summary table
+    print_model_summary(all_results)
 
 if __name__ == "__main__":
     main()

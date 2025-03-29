@@ -13,6 +13,7 @@ def get_available_providers() -> List[Tuple[str, str]]:
     """
     return [
         ("all-MiniLM-L6-v2", "sentence_transformers"),
+        ("all-minilm:22m", "ollama"),
         ("snowflake-arctic-embed:22m", "ollama"),
         ("snowflake-arctic-embed2", "ollama"),
         ("embed-english-v3.0", "cohere"),

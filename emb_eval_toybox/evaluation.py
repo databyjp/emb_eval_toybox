@@ -22,9 +22,12 @@ def calculate_dcg(relevance_scores: list[int], k: int = None) -> float:
         relevance_scores = relevance_scores[:k]
 
     gains = [2**score - 1 for score in relevance_scores]
-    dcg = gains[0]
-    for i, gain in enumerate(gains[1:], 1):
-        dcg += gain / np.log2(i + 1)
+    dcg = 0
+    for i, gain in enumerate(gains):
+        # Position 1 -> log_2(2) = 1
+        # Position 2 -> log_2(3)
+        # Position 3 -> log_2(4)
+        dcg += gain / np.log2(i + 2) if i > 0 else gain
 
     return dcg
 
@@ -166,30 +169,39 @@ def evaluate_ndcg(
 
     results = []
     for query_idx, (query, relevant_docs) in enumerate(dataset):
-        top_k_indices = np.argsort(similarities[query_idx])[-max(k_values):][::-1]
+        # Get full ranking from similarities
+        predicted_ranking = np.argsort(similarities[query_idx])[::-1]  # Sort in descending order
 
         # Calculate NDCG scores
-        actual_scores = [dataset.relevance[query_idx][i] for i in top_k_indices]
-        ideal_scores = sorted(dataset.relevance[query_idx], reverse=True)
         ndcg_scores = {}
         for k in k_values:
-            ndcg_scores[k] = calculate_ndcg(actual_scores, ideal_scores, k)
+            # Get top k predictions and their true relevance scores
+            top_k_indices = predicted_ranking[:k]
+            predicted_relevance = [dataset.relevance[query_idx][i] for i in top_k_indices]
 
-        # Get relevant documents with scores (same as original)
-        all_docs_with_scores = [
+            # Get ideal relevance scores
+            ideal_relevance = sorted(dataset.relevance[query_idx], reverse=True)[:k]
+
+            ndcg_scores[k] = calculate_ndcg(predicted_relevance, ideal_relevance, k)
+
+        # Get predicted documents with their similarity scores
+        predicted_docs = [
+            (dataset.documents[i], similarities[query_idx][i])
+            for i in predicted_ranking[:max(k_values)]
+        ]
+
+        # Get true relevant documents (unchanged)
+        true_relevant = [
             (doc, score)
             for doc, score in zip(dataset.documents, dataset.relevance[query_idx])
             if score > 0
         ]
-        all_docs_with_scores.sort(key=lambda x: x[1], reverse=True)
+        true_relevant.sort(key=lambda x: x[1], reverse=True)
 
         results.append({
             "query": query,
-            "true_relevant": all_docs_with_scores,
-            "predicted_relevant": [
-                (dataset.documents[i], dataset.relevance[query_idx][i])
-                for i in top_k_indices
-            ],
+            "true_relevant": true_relevant,
+            "predicted_relevant": predicted_docs,
             "ndcg": ndcg_scores,
             "k_values": k_values,
         })
