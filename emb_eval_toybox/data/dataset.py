@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Tuple
 import numpy as np
 
 
@@ -38,16 +38,40 @@ class SearchDataset:
 
     def _load_data(self) -> None:
         """Load the dataset from JSON file."""
-        with open(self.data_path, "r") as f:
-            data = json.load(f)
+        try:
+            with open(self.data_path, "r") as f:
+                data = json.load(f)
 
-        self.metadata = data.get("metadata", {
-            "evaluation_type": "basic",  # default if not specified
-            "description": "No description provided"
-        })
-        self.queries = data["queries"]
-        self.documents = data["documents"]
-        self.relevance = np.array(data["relevance"])
+            # Set default metadata if not provided
+            self.metadata = data.get("metadata", {})
+            if "evaluation_type" not in self.metadata:
+                self.metadata["evaluation_type"] = "basic"
+            if "description" not in self.metadata:
+                self.metadata["description"] = "No description provided"
+            if "name" not in self.metadata:
+                self.metadata["name"] = self.data_path.stem
+
+            # Load data fields
+            self.queries = data["queries"]
+            self.documents = data["documents"]
+
+            # Convert relevance scores to numpy array for efficiency
+            self.relevance = np.array(data["relevance"])
+
+            # Validate data consistency
+            if len(self.queries) != len(self.relevance):
+                raise ValueError(
+                    f"Number of queries ({len(self.queries)}) doesn't match "
+                    f"number of relevance score lists ({len(self.relevance)})"
+                )
+
+            if any(len(rel) != len(self.documents) for rel in self.relevance):
+                raise ValueError(
+                    "Each relevance score list must have the same length as documents list"
+                )
+
+        except (json.JSONDecodeError, KeyError) as e:
+            raise ValueError(f"Invalid dataset format in {self.data_path}: {e}")
 
     @property
     def evaluation_type(self) -> str:
@@ -66,12 +90,12 @@ class SearchDataset:
 
     def get_relevant_documents(self, query_idx: int) -> List[int]:
         """Get indices of relevant documents for a given query."""
-        return [i for i, rel in enumerate(self.relevance[query_idx]) if rel == 1]
+        return [i for i, rel in enumerate(self.relevance[query_idx]) if rel > 0]
 
     def __len__(self) -> int:
         """Return the number of queries in the dataset."""
         return len(self.queries)
 
-    def __getitem__(self, idx: int) -> tuple[str, List[int]]:
+    def __getitem__(self, idx: int) -> Tuple[str, List[int]]:
         """Get a query and indices of its relevant documents by index."""
         return self.queries[idx], self.get_relevant_documents(idx)

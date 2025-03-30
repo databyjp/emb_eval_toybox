@@ -31,12 +31,11 @@ if 'selected_models' not in st.session_state:
 if 'provider_expanded' not in st.session_state:
     st.session_state.provider_expanded = set()
 
-selected_models = []
-
 # Create two columns: one for provider selection, one for stats
 col1, col2 = st.columns([2, 1])
 
 with col1:
+    selected_models = []
     for provider_type, models in sorted(provider_groups.items()):
         # Create expander for each provider
         with st.expander(
@@ -54,7 +53,7 @@ with col1:
 
             # Create checkboxes for each model with unique keys
             for model in sorted(models):
-                model_key = f"model_{provider_type}_{model}"  # More specific key
+                model_key = f"model_{provider_type}_{model}"
                 checked = st.checkbox(
                     model,
                     value=all_selected or (model, provider_type) in st.session_state.selected_models,
@@ -74,10 +73,15 @@ with col1:
 
 with col2:
     st.write("**Selection Summary**")
-    for provider_type in sorted(provider_groups.keys()):
-        provider_selections = [model for model, prov in selected_models if prov == provider_type]
-        if provider_selections:
-            st.write(f"*{provider_type}:* {len(provider_selections)} selected")
+
+    # Group selected models by provider
+    provider_counts = defaultdict(int)
+    for _, provider_type in selected_models:
+        provider_counts[provider_type] += 1
+
+    # Display provider counts
+    for provider_type, count in provider_counts.items():
+        st.write(f"*{provider_type}:* {count} selected")
 
     total_selected = len(selected_models)
     if total_selected > 0:
@@ -95,6 +99,8 @@ if run_eval:
     # Get available datasets
     dataset_paths = get_available_datasets()
     all_results = defaultdict(dict)
+    # Store detailed evaluation results to avoid duplicate computation
+    detailed_results = {}
 
     # Create summary progress bar
     progress_bar = st.progress(0)
@@ -107,11 +113,16 @@ if run_eval:
                 f"Evaluating {model_name} ({provider_type}) on {dataset_name}..."
             ):
                 try:
+                    # Run evaluation and store results
                     results = evaluate_embeddings(
                         dataset_path,
                         model_name,
                         provider_type,
                     )
+
+                    # Store detailed results for reuse
+                    key = (model_name, provider_type, dataset_name)
+                    detailed_results[key] = results
 
                     # Collect and average metrics
                     metrics_accumulator = defaultdict(list)
@@ -152,8 +163,7 @@ if run_eval:
     for (model, provider), dataset_results in all_results.items():
         for dataset, metrics in dataset_results.items():
             for metric, value in metrics.items():
-                metric_type = metric.split('@')[0]  # NDCG, Precision, or Recall
-                k_value = metric.split('@')[1]      # The k value
+                metric_type, k_value = metric.split('@')
                 metric_groups[metric_type][k_value].append({
                     "Model": model,
                     "Provider": provider,
@@ -194,36 +204,44 @@ if run_eval:
 
         for dataset_name, dataset_path in dataset_paths.items():
             st.write(f"**Dataset: {dataset_name}**")
-            results = evaluate_embeddings(dataset_path, model_name, provider_type)
 
-            for i, result in enumerate(results):
-                with st.expander(f"Query: {result['query']}"):
-                    col1, col2 = st.columns(2)
+            # Use the stored results instead of re-evaluating
+            key = (model_name, provider_type, dataset_name)
+            if key in detailed_results:
+                results = detailed_results[key]
 
-                    with col1:
-                        st.write("**True Relevant Documents:**")
-                        for doc, score in result["true_relevant"]:
-                            st.write(f"- [{score:.3f}] {doc}")
+                for i, result in enumerate(results):
+                    with st.expander(f"Query: {result['query']}"):
+                        col1, col2 = st.columns(2)
 
-                    with col2:
-                        st.write("**Predicted Relevant Documents:**")
-                        for doc, score in result["predicted_relevant"]:
-                            st.write(f"- [{score:.3f}] {doc}")
+                        with col1:
+                            st.write("**True Relevant Documents:**")
+                            for doc, score in result["true_relevant"]:
+                                st.write(f"- [{score:.3f}] {doc}")
 
-                    st.write("**Metrics:**")
-                    metrics_col1, metrics_col2 = st.columns(2)
+                        with col2:
+                            st.write("**Predicted Relevant Documents:**")
+                            for doc, score in result["predicted_relevant"]:
+                                st.write(f"- [{score:.3f}] {doc}")
 
-                    with metrics_col1:
-                        if "ndcg" in result:
-                            st.write("NDCG Scores:")
-                            for k, score in result["ndcg"].items():
-                                st.write(f"- NDCG@{k}: {score:.3f}")
+                        # Metrics display
+                        st.write("**Metrics:**")
+                        metrics_col1, metrics_col2 = st.columns(2)
 
-                    with metrics_col2:
-                        if "precision_recall" in result:
-                            st.write("Precision/Recall Scores:")
-                            for k, pr_scores in result["precision_recall"].items():
-                                st.write(f"- At k={k}:")
-                                st.write(f"  Precision: {pr_scores['precision']:.3f}")
-                                st.write(f"  Recall: {pr_scores['recall']:.3f}")
+                        with metrics_col1:
+                            if "ndcg" in result:
+                                st.write("NDCG Scores:")
+                                for k, score in result["ndcg"].items():
+                                    st.write(f"- NDCG@{k}: {score:.3f}")
+
+                        with metrics_col2:
+                            if "precision_recall" in result:
+                                st.write("Precision/Recall Scores:")
+                                for k, pr_scores in result["precision_recall"].items():
+                                    st.write(f"- At k={k}:")
+                                    st.write(f"  Precision: {pr_scores['precision']:.3f}")
+                                    st.write(f"  Recall: {pr_scores['recall']:.3f}")
+            else:
+                st.error(f"No results available for {model_name} ({provider_type}) on {dataset_name}")
+
             st.markdown("---")  # Add separator between datasets

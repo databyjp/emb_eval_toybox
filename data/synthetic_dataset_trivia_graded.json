@@ -1,27 +1,58 @@
 {
     "metadata": {
-        "name": "Trivia (Graded)",
+        "name": "Recipe Search (Graded)",
         "evaluation_type": "ndcg",
-        "description": "A graded relevance dataset for NDCG evaluation with relevance scores 0-2"
+        "description": "A simplified dataset for NDCG evaluation with clear relevance criteria (scores 0-2)",
+        "relevance_criteria": {
+            "2": "Directly answers the query with specific information",
+            "1": "Partially relevant or tangentially related to the query",
+            "0": "Not relevant to the query"
+        }
     },
     "queries": [
-        "What are some surprising facts about human perception?",
-        "Which historical events had significant unexpected consequences?"
+        "How do I make chocolate chip cookies?",
+        "What are healthy breakfast options?"
     ],
     "documents": [
-        "The human eye can distinguish about 10 million different colors, but our brain can only name a few hundred of them. This gap between perception and language reveals the complexity of human visual experience.",
-        "The Great Fire of London in 1666 destroyed most of the medieval city, but it also helped eradicate the bubonic plague by killing the rats that carried the disease. This unintended consequence led to improved urban planning.",
-        "Honey never spoils - archaeologists have found pots of honey in ancient Egyptian tombs that are over 3,000 years old and still perfectly edible. This is due to its low moisture content and high acidity.",
-        "The first computer programmer was Ada Lovelace, who wrote algorithms for Charles Babbage's Analytical Engine in the 1840s. She predicted that computers could be used for more than just calculations.",
-        "Octopuses have nine brains - one central brain and eight additional brains in each tentacle. This distributed intelligence allows their arms to function semi-independently.",
-        "The invention of the printing press in 1440 led to a dramatic increase in literacy rates, but it also caused a temporary decline in the quality of books as printers rushed to meet demand.",
-        "The human brain processes visual information so quickly that we can identify images in as little as 13 milliseconds. This speed is crucial for survival and decision-making.",
-        "The discovery of penicillin was an accident - Alexander Fleming left a petri dish uncovered while on vacation, allowing mold to grow and kill the bacteria he was studying.",
-        "Some trees can communicate with each other through underground fungal networks, sharing nutrients and warning each other of threats. This 'wood wide web' challenges our understanding of plant intelligence.",
-        "The first email was sent in 1971 by Ray Tomlinson, who also chose the @ symbol for email addresses. This simple decision has become a universal symbol of digital communication."
+        "Classic chocolate chip cookie recipe: Mix 1 cup butter, 1 cup sugar, 2 eggs, 2 cups flour, 1 tsp baking soda, and 2 cups chocolate chips. Bake at 350°F for 10 minutes.",
+        "Start your day with a nutritious bowl of oatmeal topped with fresh fruits and nuts. High in fiber and protein.",
+        "The history of cookies dates back to 7th century Persia, where they were used as test cakes for oven temperature.",
+        "Avocado toast with a poached egg provides healthy fats and protein. Sprinkle with salt and pepper to taste.",
+        "Store-bought chocolate chip cookies often contain preservatives and artificial flavors not found in homemade versions.",
+        "Smoothie bowls made with Greek yogurt, berries, and a tablespoon of honey offer vitamins and antioxidants.",
+        "For chewy chocolate chip cookies, use more brown sugar than white sugar and slightly underbake them.",
+        "Overnight oats require no cooking - mix oats with milk and yogurt, refrigerate, and add toppings in the morning.",
+        "Cookie dough can be frozen for up to 3 months. Roll into balls before freezing for quick baking later.",
+        "Processed breakfast cereals often contain high amounts of sugar and should be limited in a healthy diet."
     ],
     "relevance": [
-        [2, 0, 0, 0, 1, 0, 2, 0, 1, 0],
-        [0, 2, 0, 0, 0, 1, 0, 2, 0, 1]
-    ]
+        [2, 0, 1, 0, 1, 0, 2, 0, 1, 0],
+        [0, 2, 0, 2, 0, 2, 0, 2, 0, 1]
+    ],
+    "explanations": {
+        "query1": {
+            "doc1": "Score 2: Direct recipe for chocolate chip cookies with ingredients and instructions",
+            "doc2": "Score 0: About oatmeal, not related to chocolate chip cookies",
+            "doc3": "Score 1: About cookie history, related but doesn't help make cookies",
+            "doc4": "Score 0: About avocado toast, not related to cookies",
+            "doc5": "Score 1: About chocolate chip cookies but doesn't provide a recipe",
+            "doc6": "Score 0: About smoothie bowls, not related to cookies",
+            "doc7": "Score 2: Specific tip for making chocolate chip cookies",
+            "doc8": "Score 0: About overnight oats, not related to cookies",
+            "doc9": "Score 1: About cookie dough storage, related but not a complete recipe",
+            "doc10": "Score 0: About breakfast cereals, not related to cookies"
+        },
+        "query2": {
+            "doc1": "Score 0: About cookies, not a healthy breakfast option",
+            "doc2": "Score 2: Directly describes a healthy breakfast option with nutritional benefits",
+            "doc3": "Score 0: About cookie history, not related to breakfast",
+            "doc4": "Score 2: Describes a specific healthy breakfast with nutritional benefits",
+            "doc5": "Score 0: About cookies, not a healthy breakfast option",
+            "doc6": "Score 2: Describes a specific healthy breakfast with nutritional benefits",
+            "doc7": "Score 0: About cookies, not a healthy breakfast option",
+            "doc8": "Score 2: Describes a specific healthy breakfast preparation method",
+            "doc9": "Score 0: About cookie dough, not related to breakfast",
+            "doc10": "Score 1: Relevant warning about breakfast options but doesn't suggest alternatives"
+        }
+    }
 }

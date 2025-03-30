@@ -1,14 +1,13 @@
 """Core evaluation functionality for embedding models."""
 
-from pathlib import Path
 import numpy as np
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Callable, Optional, Tuple
 from .data.dataset import SearchDataset
 from .providers import create_provider
 from .providers.base import EmbeddingProvider
 
 
-def calculate_dcg(relevance_scores: list[int], k: int = None) -> float:
+def calculate_dcg(relevance_scores: list[int], k: Optional[int] = None) -> float:
     """Calculate Discounted Cumulative Gain.
 
     Args:
@@ -33,7 +32,7 @@ def calculate_dcg(relevance_scores: list[int], k: int = None) -> float:
 
 
 def calculate_ndcg(
-    actual_scores: list[int], ideal_scores: list[int], k: int = None
+    actual_scores: list[int], ideal_scores: list[int], k: Optional[int] = None
 ) -> float:
     """Calculate Normalized Discounted Cumulative Gain.
 
@@ -51,7 +50,7 @@ def calculate_ndcg(
 
 
 def calculate_precision_recall(
-    predicted_indices: List[int], true_relevant: List[int], k: int = None
+    predicted_indices: List[int], true_relevant: List[int], k: Optional[int] = None
 ) -> tuple[float, float]:
     """Calculate precision and recall at k.
 
@@ -82,33 +81,83 @@ def calculate_precision_recall(
     return precision, recall
 
 
-def evaluate_basic(
+def _evaluate_common(
     dataset: SearchDataset,
     provider: EmbeddingProvider,
-    k_values: List[int] = None,
+    k_values: List[int],
+    calculate_metrics: Callable
 ) -> List[Dict[str, Any]]:
-    """Evaluate an embedding model using basic metrics (precision/recall).
+    """Common evaluation logic for all evaluation types.
 
     Args:
         dataset: SearchDataset object
         provider: EmbeddingProvider object
-        k_values: List of k values for computing metrics. If None, uses [3, 5, 10]
+        k_values: List of k values for computing metrics
+        calculate_metrics: Function that calculates specific metrics
 
     Returns:
         List of dictionaries containing evaluation results for each query
     """
-    if k_values is None:
-        k_values = [3, 5, 10]
-
     # Generate embeddings
     query_embeddings = provider.encode(dataset.queries)
     doc_embeddings = provider.encode(dataset.documents)
     similarities = np.dot(query_embeddings, doc_embeddings.T)
 
     results = []
-    for query_idx, (query, relevant_docs) in enumerate(dataset):
-        top_k_indices = np.argsort(similarities[query_idx])[-max(k_values):][::-1]
+    for query_idx, (query, _) in enumerate(dataset):
+        # Get full ranking from similarities
+        predicted_ranking = np.argsort(similarities[query_idx])[::-1]
 
+        # Get true relevant documents
+        true_relevant = [
+            (doc, score)
+            for doc, score in zip(dataset.documents, dataset.relevance[query_idx])
+            if score > 0
+        ]
+        true_relevant.sort(key=lambda x: x[1], reverse=True)
+
+        # Get predicted documents with scores
+        predicted_docs = [
+            (dataset.documents[i], similarities[query_idx][i])
+            for i in predicted_ranking[:max(k_values)]
+        ]
+
+        # Calculate metrics using the provided function
+        metrics = calculate_metrics(dataset, query_idx, predicted_ranking, k_values)
+
+        result = {
+            "query": query,
+            "true_relevant": true_relevant,
+            "predicted_relevant": predicted_docs,
+            **metrics
+        }
+
+        results.append(result)
+
+    return results
+
+
+def evaluate_basic(
+    dataset: SearchDataset,
+    provider: EmbeddingProvider,
+    k_values: List[int],
+) -> List[Dict[str, Any]]:
+    """Evaluate an embedding model using basic metrics (precision/recall).
+
+    Args:
+        dataset: SearchDataset object
+        provider: EmbeddingProvider object
+        k_values: List of k values for computing metrics
+
+    Returns:
+        List of dictionaries containing evaluation results for each query
+    """
+    def calculate_basic_metrics(
+        dataset: SearchDataset,
+        query_idx: int,
+        predicted_ranking: np.ndarray,
+        k_values: List[int]
+    ) -> Dict[str, Any]:
         # Calculate precision/recall metrics
         precision_recall_scores = {}
         true_relevant_indices = [
@@ -118,60 +167,36 @@ def evaluate_basic(
 
         for k in k_values:
             precision, recall = calculate_precision_recall(
-                top_k_indices.tolist(), true_relevant_indices, k
+                predicted_ranking[:k].tolist(), true_relevant_indices, k
             )
             precision_recall_scores[k] = {"precision": precision, "recall": recall}
 
-        # Get relevant documents with scores (same as original)
-        all_docs_with_scores = [
-            (doc, score)
-            for doc, score in zip(dataset.documents, dataset.relevance[query_idx])
-            if score > 0
-        ]
-        all_docs_with_scores.sort(key=lambda x: x[1], reverse=True)
+        return {"precision_recall": precision_recall_scores}
 
-        results.append({
-            "query": query,
-            "true_relevant": all_docs_with_scores,
-            "predicted_relevant": [
-                (dataset.documents[i], dataset.relevance[query_idx][i])
-                for i in top_k_indices
-            ],
-            "precision_recall": precision_recall_scores,
-            "k_values": k_values,
-        })
-
-    return results
+    return _evaluate_common(dataset, provider, k_values, calculate_basic_metrics)
 
 
 def evaluate_ndcg(
     dataset: SearchDataset,
     provider: EmbeddingProvider,
-    k_values: List[int] = None,
+    k_values: List[int],
 ) -> List[Dict[str, Any]]:
     """Evaluate an embedding model using NDCG metrics.
 
     Args:
         dataset: SearchDataset object
         provider: EmbeddingProvider object
-        k_values: List of k values for computing metrics. If None, uses [3, 5, 10]
+        k_values: List of k values for computing metrics
 
     Returns:
         List of dictionaries containing evaluation results for each query
     """
-    if k_values is None:
-        k_values = [3, 5, 10]
-
-    # Generate embeddings
-    query_embeddings = provider.encode(dataset.queries)
-    doc_embeddings = provider.encode(dataset.documents)
-    similarities = np.dot(query_embeddings, doc_embeddings.T)
-
-    results = []
-    for query_idx, (query, relevant_docs) in enumerate(dataset):
-        # Get full ranking from similarities
-        predicted_ranking = np.argsort(similarities[query_idx])[::-1]  # Sort in descending order
-
+    def calculate_ndcg_metrics(
+        dataset: SearchDataset,
+        query_idx: int,
+        predicted_ranking: np.ndarray,
+        k_values: List[int]
+    ) -> Dict[str, Any]:
         # Calculate NDCG scores
         ndcg_scores = {}
         for k in k_values:
@@ -184,36 +209,16 @@ def evaluate_ndcg(
 
             ndcg_scores[k] = calculate_ndcg(predicted_relevance, ideal_relevance, k)
 
-        # Get predicted documents with their similarity scores
-        predicted_docs = [
-            (dataset.documents[i], similarities[query_idx][i])
-            for i in predicted_ranking[:max(k_values)]
-        ]
+        return {"ndcg": ndcg_scores}
 
-        # Get true relevant documents (unchanged)
-        true_relevant = [
-            (doc, score)
-            for doc, score in zip(dataset.documents, dataset.relevance[query_idx])
-            if score > 0
-        ]
-        true_relevant.sort(key=lambda x: x[1], reverse=True)
-
-        results.append({
-            "query": query,
-            "true_relevant": true_relevant,
-            "predicted_relevant": predicted_docs,
-            "ndcg": ndcg_scores,
-            "k_values": k_values,
-        })
-
-    return results
+    return _evaluate_common(dataset, provider, k_values, calculate_ndcg_metrics)
 
 
 def evaluate_embeddings(
     dataset_path: str,
     provider_name: str = "all-MiniLM-L6-v2",
     provider_type: str = "sentence_transformers",
-    k_values: List[int] = None,
+    k_values: Optional[List[int]] = None,
 ) -> List[Dict[str, Any]]:
     """High-level function that delegates to the appropriate evaluation function."""
     dataset = SearchDataset(dataset_path)

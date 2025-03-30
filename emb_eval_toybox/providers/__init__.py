@@ -37,9 +37,9 @@ def create_provider(provider_type: str, provider_name: str) -> EmbeddingProvider
         ValueError: If the provider type is unknown
     """
     if provider_type not in PROVIDER_REGISTRY:
+        available_types = ", ".join(PROVIDER_REGISTRY.keys())
         raise ValueError(
-            f"Unknown provider type: {provider_type}. "
-            f"Available types: {list(PROVIDER_REGISTRY.keys())}"
+            f"Unknown provider type: {provider_type}. Available types: {available_types}"
         )
 
     provider_class = PROVIDER_REGISTRY[provider_type]
