@@ -1,58 +1,305 @@
 {
     "metadata": {
-        "name": "Recipe Search (Graded)",
+        "name": "Food & Recipe Search (Enhanced)",
         "evaluation_type": "ndcg",
-        "description": "A simplified dataset for NDCG evaluation with clear relevance criteria (scores 0-2)",
+        "description": "An advanced dataset for NDCG evaluation with nuanced relevance distinctions",
         "relevance_criteria": {
-            "2": "Directly answers the query with specific information",
-            "1": "Partially relevant or tangentially related to the query",
-            "0": "Not relevant to the query"
+            "3": "Perfect match - comprehensive answer with all necessary details",
+            "2": "Good match - directly answers the query but may lack some details",
+            "1": "Partial match - contains relevant information but incomplete",
+            "0": "Not relevant - unrelated to the query"
         }
     },
     "queries": [
-        "How do I make chocolate chip cookies?",
-        "What are healthy breakfast options?"
+        {
+            "id": "q1",
+            "text": "How do I make chocolate chip cookies from scratch?"
+        },
+        {
+            "id": "q2",
+            "text": "What are quick healthy breakfast options for busy mornings?"
+        }
     ],
     "documents": [
-        "Classic chocolate chip cookie recipe: Mix 1 cup butter, 1 cup sugar, 2 eggs, 2 cups flour, 1 tsp baking soda, and 2 cups chocolate chips. Bake at 350°F for 10 minutes.",
-        "Start your day with a nutritious bowl of oatmeal topped with fresh fruits and nuts. High in fiber and protein.",
-        "The history of cookies dates back to 7th century Persia, where they were used as test cakes for oven temperature.",
-        "Avocado toast with a poached egg provides healthy fats and protein. Sprinkle with salt and pepper to taste.",
-        "Store-bought chocolate chip cookies often contain preservatives and artificial flavors not found in homemade versions.",
-        "Smoothie bowls made with Greek yogurt, berries, and a tablespoon of honey offer vitamins and antioxidants.",
-        "For chewy chocolate chip cookies, use more brown sugar than white sugar and slightly underbake them.",
-        "Overnight oats require no cooking - mix oats with milk and yogurt, refrigerate, and add toppings in the morning.",
-        "Cookie dough can be frozen for up to 3 months. Roll into balls before freezing for quick baking later.",
-        "Processed breakfast cereals often contain high amounts of sugar and should be limited in a healthy diet."
-    ],
-    "relevance": [
-        [2, 0, 1, 0, 1, 0, 2, 0, 1, 0],
-        [0, 2, 0, 2, 0, 2, 0, 2, 0, 1]
-    ],
-    "explanations": {
-        "query1": {
-            "doc1": "Score 2: Direct recipe for chocolate chip cookies with ingredients and instructions",
-            "doc2": "Score 0: About oatmeal, not related to chocolate chip cookies",
-            "doc3": "Score 1: About cookie history, related but doesn't help make cookies",
-            "doc4": "Score 0: About avocado toast, not related to cookies",
-            "doc5": "Score 1: About chocolate chip cookies but doesn't provide a recipe",
-            "doc6": "Score 0: About smoothie bowls, not related to cookies",
-            "doc7": "Score 2: Specific tip for making chocolate chip cookies",
-            "doc8": "Score 0: About overnight oats, not related to cookies",
-            "doc9": "Score 1: About cookie dough storage, related but not a complete recipe",
-            "doc10": "Score 0: About breakfast cereals, not related to cookies"
+        {
+            "id": "doc01",
+            "text": "Classic chocolate chip cookie recipe: Mix 1 cup softened butter with 3/4 cup brown sugar and 3/4 cup white sugar until creamy. Beat in 2 eggs and 2 tsp vanilla. Combine 2 1/4 cups flour, 1 tsp baking soda, 1/2 tsp salt and gradually add to mixture. Fold in 2 cups chocolate chips. Drop by tablespoons onto ungreased baking sheets. Bake at 375°F for 9-11 minutes until golden brown.",
+            "relevance": {
+                "q1": {
+                    "score": 3,
+                    "explanation": "Perfect score - Complete recipe with all ingredients, measurements, steps, and baking temperature/time"
+                },
+                "q2": {
+                    "score": 0,
+                    "explanation": "Not relevant - Cookies are not a quick healthy breakfast option"
+                }
+            }
         },
-        "query2": {
-            "doc1": "Score 0: About cookies, not a healthy breakfast option",
-            "doc2": "Score 2: Directly describes a healthy breakfast option with nutritional benefits",
-            "doc3": "Score 0: About cookie history, not related to breakfast",
-            "doc4": "Score 2: Describes a specific healthy breakfast with nutritional benefits",
-            "doc5": "Score 0: About cookies, not a healthy breakfast option",
-            "doc6": "Score 2: Describes a specific healthy breakfast with nutritional benefits",
-            "doc7": "Score 0: About cookies, not a healthy breakfast option",
-            "doc8": "Score 2: Describes a specific healthy breakfast preparation method",
-            "doc9": "Score 0: About cookie dough, not related to breakfast",
-            "doc10": "Score 1: Relevant warning about breakfast options but doesn't suggest alternatives"
+        {
+            "id": "doc02",
+            "text": "Start your day with overnight oats - combine 1/2 cup rolled oats with 1/2 cup milk in a jar, add yogurt and your favorite fruits. Refrigerate overnight and grab on your way out the door. Takes just 2 minutes to prepare the night before.",
+            "relevance": {
+                "q1": {
+                    "score": 0,
+                    "explanation": "Not relevant - About breakfast, not cookies"
+                },
+                "q2": {
+                    "score": 3,
+                    "explanation": "Perfect score - Quick breakfast with prep time mentioned and grab-and-go feature"
+                }
+            }
+        },
+        {
+            "id": "doc03",
+            "text": "The history of chocolate chip cookies dates back to 1938 when Ruth Wakefield at the Toll House Inn accidentally created them by adding chopped chocolate to cookie dough, expecting it to melt completely.",
+            "relevance": {
+                "q1": {
+                    "score": 1,
+                    "explanation": "Partial score - Historical context about cookies but no recipe"
+                },
+                "q2": {
+                    "score": 0,
+                    "explanation": "Not relevant - About cookie history, not breakfast"
+                }
+            }
+        },
+        {
+            "id": "doc04",
+            "text": "For perfectly cooked salmon, try the 4-3-2 method: 4 minutes per half-inch of thickness, using 3 tablespoons of oil or butter, at 2 inches distance from heat source. Season with salt, pepper, and lemon before cooking.",
+            "relevance": {
+                "q1": {
+                    "score": 0,
+                    "explanation": "Not relevant - About salmon, not cookies"
+                },
+                "q2": {
+                    "score": 0,
+                    "explanation": "Not relevant - About salmon, not breakfast"
+                }
+            }
+        },
+        {
+            "id": "doc05",
+            "text": "Store-bought cookie dough often contains preservatives and stabilizers. For healthier homemade cookies, substitute half the butter with applesauce and use whole wheat flour instead of white flour.",
+            "relevance": {
+                "q1": {
+                    "score": 1,
+                    "explanation": "Partial score - Information about cookie ingredients but no actual recipe"
+                },
+                "q2": {
+                    "score": 0,
+                    "explanation": "Not relevant - About cookies, not breakfast"
+                }
+            }
+        },
+        {
+            "id": "doc06",
+            "text": "Greek yogurt with berries, a drizzle of honey, and a sprinkle of granola makes a protein-packed breakfast you can assemble in under 60 seconds. Add nuts for healthy fats that keep you fuller longer.",
+            "relevance": {
+                "q1": {
+                    "score": 0,
+                    "explanation": "Not relevant - About breakfast, not cookies"
+                },
+                "q2": {
+                    "score": 2,
+                    "explanation": "Good score - Quick breakfast with 'under 60 seconds' timing mentioned"
+                }
+            }
+        },
+        {
+            "id": "doc07",
+            "text": "For soft, chewy chocolate chip cookies, use more brown sugar than white sugar, add an extra egg yolk, and slightly underbake them by removing from the oven when edges are set but centers look slightly underdone.",
+            "relevance": {
+                "q1": {
+                    "score": 2,
+                    "explanation": "Good score - Provides key tips for cookies but not a complete recipe"
+                },
+                "q2": {
+                    "score": 0,
+                    "explanation": "Not relevant - About cookies, not breakfast"
+                }
+            }
+        },
+        {
+            "id": "doc08",
+            "text": "Poached eggs on whole grain toast take just 4 minutes to prepare. Fill a pan with 2 inches of water, bring to a simmer, add a splash of vinegar, create a gentle whirlpool and crack egg into center. Toast bread while egg cooks.",
+            "relevance": {
+                "q1": {
+                    "score": 0,
+                    "explanation": "Not relevant - About eggs, not cookies"
+                },
+                "q2": {
+                    "score": 2,
+                    "explanation": "Good score - 4-minute breakfast with timing mentioned"
+                }
+            }
+        },
+        {
+            "id": "doc09",
+            "text": "Refrigerate cookie dough for 24-48 hours before baking to develop deeper flavor as the flour hydrates and sugars caramelize more effectively during baking. This technique was pioneered by Jacques Torres.",
+            "relevance": {
+                "q1": {
+                    "score": 2,
+                    "explanation": "Good score - Offers important technique for better cookies but not a full recipe"
+                },
+                "q2": {
+                    "score": 0,
+                    "explanation": "Not relevant - About cookie dough, not breakfast"
+                }
+            }
+        },
+        {
+            "id": "doc10",
+            "text": "Avoid sugary cereals by making a 3-minute breakfast smoothie with frozen banana, spinach (you won't taste it!), protein powder, and almond milk. Blend and pour into a travel cup for a nutritious meal on the go.",
+            "relevance": {
+                "q1": {
+                    "score": 0,
+                    "explanation": "Not relevant - About smoothies, not cookies"
+                },
+                "q2": {
+                    "score": 3,
+                    "explanation": "Perfect score - 3-minute smoothie with emphasis on quick preparation"
+                }
+            }
+        },
+        {
+            "id": "doc11",
+            "text": "Pan-seared salmon with crispy skin: Pat salmon dry, season both sides, place skin-side down in a hot oiled skillet for 4-5 minutes until skin is crispy, flip and cook 2-3 minutes more. Let rest before serving.",
+            "relevance": {
+                "q1": {
+                    "score": 0,
+                    "explanation": "Not relevant - About salmon, not cookies"
+                },
+                "q2": {
+                    "score": 0,
+                    "explanation": "Not relevant - About salmon, not breakfast"
+                }
+            }
+        },
+        {
+            "id": "doc12",
+            "text": "Traditional pasta dishes can be made healthier by using whole grain pasta, adding extra vegetables, reducing cheese portions, and using lean proteins. Try zucchini noodles or spaghetti squash as alternatives.",
+            "relevance": {
+                "q1": {
+                    "score": 0,
+                    "explanation": "Not relevant - About pasta, not cookies"
+                },
+                "q2": {
+                    "score": 0,
+                    "explanation": "Not relevant - About pasta, not breakfast"
+                }
+            }
+        },
+        {
+            "id": "doc13",
+            "text": "Cookie troubleshooting: If cookies spread too much, chill dough longer; if too cakey, reduce flour; if too crisp, reduce baking time; if too pale, increase oven temperature by 25 degrees.",
+            "relevance": {
+                "q1": {
+                    "score": 2,
+                    "explanation": "Good score - Gives troubleshooting tips that help with making cookies"
+                },
+                "q2": {
+                    "score": 0,
+                    "explanation": "Not relevant - About cookies, not breakfast"
+                }
+            }
+        },
+        {
+            "id": "doc14",
+            "text": "A bowl of steel-cut oats provides sustained energy throughout the morning. For quick preparation, soak overnight or use an Instant Pot (3 minutes high pressure, 20 minutes natural release).",
+            "relevance": {
+                "q1": {
+                    "score": 0,
+                    "explanation": "Not relevant - About oats, not cookies"
+                },
+                "q2": {
+                    "score": 1,
+                    "explanation": "Partial score - Healthy but focuses on quick cooking methods rather than quick overall preparation"
+                }
+            }
+        },
+        {
+            "id": "doc15",
+            "text": "Cedar plank salmon: Soak cedar plank in water for 2 hours, preheat grill to medium-high, place salmon on plank, season, and grill with lid closed for 12-15 minutes until fish flakes easily.",
+            "relevance": {
+                "q1": {
+                    "score": 0,
+                    "explanation": "Not relevant - About salmon, not cookies"
+                },
+                "q2": {
+                    "score": 0,
+                    "explanation": "Not relevant - About salmon, not breakfast"
+                }
+            }
+        },
+        {
+            "id": "doc16",
+            "text": "Make pasta primavera with 75% vegetables and 25% pasta. Sauté seasonal vegetables in olive oil with garlic, toss with whole wheat pasta and herbs. Add a splash of pasta water instead of cream for silkiness.",
+            "relevance": {
+                "q1": {
+                    "score": 0,
+                    "explanation": "Not relevant - About pasta, not cookies"
+                },
+                "q2": {
+                    "score": 0,
+                    "explanation": "Not relevant - About pasta, not breakfast"
+                }
+            }
+        },
+        {
+            "id": "doc17",
+            "text": "High-altitude cookie baking requires adjustments: increase flour by 1-2 tablespoons, reduce sugar slightly, raise oven temperature by 25 degrees, and add an extra egg for moisture and structure.",
+            "relevance": {
+                "q1": {
+                    "score": 1,
+                    "explanation": "Partial score - Specialized information for high-altitude baking but not a complete recipe"
+                },
+                "q2": {
+                    "score": 0,
+                    "explanation": "Not relevant - About cookies, not breakfast"
+                }
+            }
+        },
+        {
+            "id": "doc18",
+            "text": "Two-minute breakfast burrito: scramble an egg in the microwave for 45 seconds, place in a whole grain tortilla with pre-shredded cheese and pre-chopped vegetables or salsa. Roll and go!",
+            "relevance": {
+                "q1": {
+                    "score": 0,
+                    "explanation": "Not relevant - About breakfast, not cookies"
+                },
+                "q2": {
+                    "score": 3,
+                    "explanation": "Perfect score - Two-minute breakfast explicitly for time-saving"
+                }
+            }
+        },
+        {
+            "id": "doc19",
+            "text": "Slow-roasted salmon at 250°F for 25-30 minutes yields perfectly tender, moist fish that's nearly impossible to overcook. Brush with olive oil and season simply with salt and herbs.",
+            "relevance": {
+                "q1": {
+                    "score": 0,
+                    "explanation": "Not relevant - About salmon, not cookies"
+                },
+                "q2": {
+                    "score": 0,
+                    "explanation": "Not relevant - About salmon, not breakfast"
+                }
+            }
+        },
+        {
+            "id": "doc20",
+            "text": "Replace regular pasta with legume-based alternatives like chickpea or lentil pasta to double the protein and fiber content while reducing carbohydrates. These alternatives hold up well with robust sauces.",
+            "relevance": {
+                "q1": {
+                    "score": 0,
+                    "explanation": "Not relevant - About pasta, not cookies"
+                },
+                "q2": {
+                    "score": 0,
+                    "explanation": "Not relevant - About pasta, not breakfast"
+                }
+            }
         }
-    }
+    ]
 }

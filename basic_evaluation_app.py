@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 from emb_eval_toybox.registry import get_available_providers, get_available_datasets
 from emb_eval_toybox.evaluation import evaluate_embeddings
+from emb_eval_toybox.visualization import display_document_card, display_metrics_summary
 from collections import defaultdict
 import torch
 
@@ -211,36 +212,34 @@ if run_eval:
                 results = detailed_results[key]
 
                 for i, result in enumerate(results):
-                    with st.expander(f"Query: {result['query']}"):
+                    with st.expander(f"Query {result['query_id']}: {result['query_text']}"):
                         col1, col2 = st.columns(2)
 
                         with col1:
                             st.write("**True Relevant Documents:**")
-                            for doc, score in result["true_relevant"]:
-                                st.write(f"- [{score:.3f}] {doc}")
+                            for doc in result["true_relevant"]:
+                                display_document_card(
+                                    doc["id"],
+                                    doc["text"],
+                                    doc["score"],
+                                    doc.get("explanation")
+                                )
 
                         with col2:
                             st.write("**Predicted Relevant Documents:**")
-                            for doc, score in result["predicted_relevant"]:
-                                st.write(f"- [{score:.3f}] {doc}")
+                            for doc in result["predicted_relevant"][:5]:  # Limit to top 5
+                                display_document_card(
+                                    doc["id"],
+                                    doc["text"],
+                                    doc["similarity"],
+                                    None,
+                                    true_relevance=doc["true_relevance"]
+                                )
 
-                        # Metrics display
+                        # Metrics display using the reusable component
                         st.write("**Metrics:**")
-                        metrics_col1, metrics_col2 = st.columns(2)
+                        display_metrics_summary(result)
 
-                        with metrics_col1:
-                            if "ndcg" in result:
-                                st.write("NDCG Scores:")
-                                for k, score in result["ndcg"].items():
-                                    st.write(f"- NDCG@{k}: {score:.3f}")
-
-                        with metrics_col2:
-                            if "precision_recall" in result:
-                                st.write("Precision/Recall Scores:")
-                                for k, pr_scores in result["precision_recall"].items():
-                                    st.write(f"- At k={k}:")
-                                    st.write(f"  Precision: {pr_scores['precision']:.3f}")
-                                    st.write(f"  Recall: {pr_scores['recall']:.3f}")
             else:
                 st.error(f"No results available for {model_name} ({provider_type}) on {dataset_name}")
 

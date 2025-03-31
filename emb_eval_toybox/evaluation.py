@@ -108,25 +108,48 @@ def _evaluate_common(
         # Get full ranking from similarities
         predicted_ranking = np.argsort(similarities[query_idx])[::-1]
 
-        # Get true relevant documents
-        true_relevant = [
-            (doc, score)
-            for doc, score in zip(dataset.documents, dataset.relevance[query_idx])
-            if score > 0
-        ]
-        true_relevant.sort(key=lambda x: x[1], reverse=True)
+        # Get true relevant documents with scores and explanations
+        true_relevant = []
+        for doc_idx, score in enumerate(dataset.relevance[query_idx]):
+            if score > 0:
+                doc_info = {
+                    "id": dataset.get_document_id(doc_idx),
+                    "text": dataset.documents[doc_idx],
+                    "score": score,
+                    "explanation": dataset.get_explanation(query_idx, doc_idx)
+                }
+                # Remove None explanations
+                if doc_info["explanation"] is None:
+                    doc_info.pop("explanation")
+
+                true_relevant.append(doc_info)
+
+        # Sort by relevance score
+        true_relevant.sort(key=lambda x: x["score"], reverse=True)
 
         # Get predicted documents with scores
-        predicted_docs = [
-            (dataset.documents[i], similarities[query_idx][i])
-            for i in predicted_ranking[:max(k_values)]
-        ]
+        predicted_docs = []
+        for i in predicted_ranking[:max(k_values)]:
+            doc_info = {
+                "id": dataset.get_document_id(i),
+                "text": dataset.documents[i],
+                "similarity": float(similarities[query_idx][i]),  # Convert to float for JSON serialization
+                "true_relevance": int(dataset.relevance[query_idx][i]),
+                "explanation": dataset.get_explanation(query_idx, i)
+            }
+
+            # Remove None explanations
+            if doc_info["explanation"] is None:
+                doc_info.pop("explanation")
+
+            predicted_docs.append(doc_info)
 
         # Calculate metrics using the provided function
         metrics = calculate_metrics(dataset, query_idx, predicted_ranking, k_values)
 
         result = {
-            "query": query,
+            "query_id": dataset.get_query_id(query_idx),
+            "query_text": query,
             "true_relevant": true_relevant,
             "predicted_relevant": predicted_docs,
             **metrics

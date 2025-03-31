@@ -2,21 +2,80 @@
     "metadata": {
         "name": "Coffee Dataset",
         "evaluation_type": "basic",
-        "description": "A binary relevance dataset about coffee drinks for precision/recall evaluation. Uses 0/1 relevance scores to indicate whether a document is relevant to each query."
+        "description": "A binary relevance dataset about coffee drinks for precision/recall evaluation.",
+        "relevance_criteria": {
+            "1": "Relevant - directly answers or addresses the query",
+            "0": "Not relevant - does not address the query"
+        }
     },
     "queries": [
-        "What's a strong espresso drink with milk?",
-        "Show me drinks with coffee and hot water",
-        "What's the most popular coffee drink?"
+        {
+            "id": "q1",
+            "text": "What's a strong espresso drink with milk?"
+        },
+        {
+            "id": "q2",
+            "text": "Show me drinks with coffee and hot water"
+        },
+        {
+            "id": "q3",
+            "text": "What's the most popular coffee drink?"
+        }
     ],
     "documents": [
-        "A cappuccino is made with equal parts espresso, steamed milk, and milk foam. It's one of the most popular coffee drinks worldwide.",
-        "A latte is an espresso-based drink with steamed milk and a small layer of foam. It's known for its smooth, creamy texture.",
-        "An Americano is made by diluting espresso with hot water. It's strong but less intense than straight espresso."
-    ],
-    "relevance": [
-        [1, 1, 0],
-        [0, 0, 1],
-        [1, 0, 0]
+        {
+            "id": "doc1",
+            "text": "A cappuccino is made with equal parts espresso, steamed milk, and milk foam. It's one of the most popular coffee drinks worldwide.",
+            "relevance": {
+                "q1": {
+                    "score": 1,
+                    "explanation": "Relevant - cappuccino is a strong espresso drink with milk"
+                },
+                "q2": {
+                    "score": 0,
+                    "explanation": "Not relevant - cappuccino doesn't contain hot water"
+                },
+                "q3": {
+                    "score": 1,
+                    "explanation": "Relevant - describes cappuccino as 'one of the most popular coffee drinks'"
+                }
+            }
+        },
+        {
+            "id": "doc2",
+            "text": "A latte is an espresso-based drink with steamed milk and a small layer of foam. It's known for its smooth, creamy texture.",
+            "relevance": {
+                "q1": {
+                    "score": 1,
+                    "explanation": "Relevant - latte is an espresso drink with milk"
+                },
+                "q2": {
+                    "score": 0,
+                    "explanation": "Not relevant - latte doesn't contain hot water"
+                },
+                "q3": {
+                    "score": 0,
+                    "explanation": "Not relevant - doesn't mention popularity"
+                }
+            }
+        },
+        {
+            "id": "doc3",
+            "text": "An Americano is made by diluting espresso with hot water. It's strong but less intense than straight espresso.",
+            "relevance": {
+                "q1": {
+                    "score": 0,
+                    "explanation": "Not relevant - Americano doesn't contain milk"
+                },
+                "q2": {
+                    "score": 1,
+                    "explanation": "Relevant - Americano is explicitly described as espresso with hot water"
+                },
+                "q3": {
+                    "score": 0,
+                    "explanation": "Not relevant - doesn't mention popularity"
+                }
+            }
+        }
     ]
 }
