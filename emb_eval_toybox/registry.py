@@ -18,6 +18,7 @@ def get_available_providers() -> List[Tuple[str, str]]:
         ("snowflake-arctic-embed:22m", "ollama"),
         ("snowflake-arctic-embed2", "ollama"),
         ("embed-english-v3.0", "cohere"),
+        ("facebook/fasttext-en-vectors", "fasttext"),
     ]
 
     return providers

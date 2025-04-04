@@ -7,12 +7,14 @@ from .base import EmbeddingProvider
 from .sentence_transformers import SentenceTransformersProvider
 from .ollama import OllamaProvider
 from .cohere import CohereProvider
+from .fasttext import FastTextProvider
 
 __all__ = [
     "EmbeddingProvider",
     "SentenceTransformersProvider",
     "OllamaProvider",
     "CohereProvider",
+    "FastTextProvider",
     "create_provider",
 ]
 
@@ -21,13 +23,14 @@ PROVIDER_REGISTRY: Dict[str, Type[EmbeddingProvider]] = {
     "sentence_transformers": SentenceTransformersProvider,
     "ollama": OllamaProvider,
     "cohere": CohereProvider,
+    "fasttext": FastTextProvider,
 }
 
 def create_provider(provider_type: str, provider_name: str) -> EmbeddingProvider:
     """Create an embedding provider instance.
 
     Args:
-        provider_type: Type of provider ("sentence_transformers", "ollama", or "cohere")
+        provider_type: Type of provider ("sentence_transformers", "ollama", "cohere", or "fasttext")
         provider_name: Name of the model to use
 
     Returns:
