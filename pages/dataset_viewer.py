@@ -1,9 +1,6 @@
 import streamlit as st
-import json
-from pathlib import Path
 from emb_eval_toybox.registry import get_available_datasets
 from emb_eval_toybox.data.dataset import SearchDataset
-import pandas as pd
 from emb_eval_toybox.visualization import display_document_card
 
 st.set_page_config(page_title="Dataset Explorer", layout="wide")
