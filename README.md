@@ -11,12 +11,6 @@ A Python demo app for evaluating vector embedding models, designed for education
   - Precision@k, Recall@k
 - Synthetic datasets for testing
 
-## Installation
-
-```bash
-pip install -e .
-```
-
 ## Usage
 
 Run the streamlit app from the virtual environment:
