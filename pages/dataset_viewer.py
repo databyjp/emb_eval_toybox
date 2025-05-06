@@ -44,7 +44,14 @@ if selected_dataset:
 
     for query_idx, (query, _) in enumerate(dataset):
         query_id = dataset.get_query_id(query_idx)
-        with st.expander(f"Query {query_id}: {query}"):
+        # Truncate query text for expander header (show first 50 chars + "..." if longer)
+        truncated_query = (query[:50] + "...") if len(query) > 50 else query
+
+        with st.expander(f"Query {query_id}: {truncated_query}"):
+            # Display full query in larger font
+            st.markdown(f"### {query}")
+            st.markdown("---")  # Add separator
+
             # Get all documents with their relevance scores and explanations
             documents_data = []
             for doc_idx, score in enumerate(dataset.relevance[query_idx]):
@@ -82,5 +89,6 @@ if selected_dataset:
                     doc["id"],
                     doc["text"],
                     doc["score"],
-                    doc.get("explanation")
+                    doc.get("explanation"),
+                    is_true_document=True
                 )

@@ -9,16 +9,18 @@ def display_document_card(
     doc_text: str,
     score: float,
     explanation: Optional[str] = None,
-    true_relevance: Optional[int] = None
+    true_relevance: Optional[int] = None,
+    is_true_document: bool = False
 ) -> None:
     """Display a document card with relevance information.
 
     Args:
         doc_id: Document identifier
         doc_text: Document text content
-        score: Relevance score or similarity score
+        score: Relevance score (int) for true documents or similarity score (float) for predictions
         explanation: Optional explanation of relevance
         true_relevance: Optional true relevance score (for predicted documents)
+        is_true_document: Whether this is a true relevant document vs a prediction
     """
     with st.container():
         # Use columns for layout
@@ -33,14 +35,14 @@ def display_document_card(
                 st.caption(f"*{explanation}*")
 
         with col2:
-            # Score display
-            if score > 0:
-                st.markdown(f":blue[Score: **{score:.2f}**]")
+            # Score display - differentiate between true documents and predictions
+            if is_true_document:
+                st.markdown(f":blue[Score: **{int(score)}**]")
             else:
-                st.markdown(f"Score: **{score:.2f}**")
+                st.markdown(f"Similarity: **{score:.2f}**")
 
-            # True relevance if available
-            if true_relevance is not None:
+            # True relevance if available (only for predictions)
+            if true_relevance is not None and not is_true_document:
                 st.markdown(f"True relevance: **{true_relevance}**")
 
         # Add a subtle separator
