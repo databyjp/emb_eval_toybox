@@ -1,17 +1,15 @@
 # Embedding Evaluation Toybox
 
-A Python tool for evaluating vector embedding models, designed for educational purposes. This tool provides simple examples for comparing different embedding models on semantic search tasks.
+A Python demo app for evaluating vector embedding models, designed for educational purposes. This tool provides simple examples for comparing different embedding models on semantic search tasks.
 
 ## Features
 
-- Support for multiple embedding providers:
-  - Sentence Transformers
-  - Ollama
+- Support for multiple embedding providers
 - Evaluation metrics:
   - NDCG (Normalized Discounted Cumulative Gain) with graded relevance
   - Support for multiple evaluation depths (NDCG@3, NDCG@5, NDCG@10)
   - Precision@k, Recall@k
-- Synthetic datasets for testing:
+- Synthetic datasets for testing
 
 ## Installation
 
@@ -21,20 +19,10 @@ pip install -e .
 
 ## Usage
 
-### Basic Evaluation
-
-Run the basic evaluation script to compare different embedding models:
+Run the streamlit app from the virtual environment:
 
 ```bash
-python examples/basic_evaluation.py
-```
-
-### NDCG Evaluation
-
-Run the NDCG evaluation script to get detailed ranking quality metrics:
-
-```bash
-python examples/ndcg_evaluation.py
+streamlit basic_evaluation_app.py
 ```
 
 ## Datasets
